@@ -2,6 +2,8 @@
 
 U.S. News 2026 全美综合大学排名 + 计算机专业排名可视化页面。
 
+**在线地址**：https://ssuper1.github.io/us-universities-top60/
+
 ## 这是什么
 
 一个**单文件、零依赖**的 HTML 页面（数据、样式、脚本全部内联），双击即可在浏览器打开，不需要构建、不需要联网安装任何东西。
@@ -25,6 +27,8 @@ U.S. News 2026 全美综合大学排名 + 计算机专业排名可视化页面�
 | --- | --- |
 | `us-universities-top60-2026.html` | 主页面，自包含 |
 | `us-atlas-states-10m.json` | 美国州界拓扑数据，地图浮层用 |
+| `index.html` | 站点入口，访问目录根路径时自动跳转到主页面（GitHub Pages 用） |
+| `.nojekyll` | 关闭 GitHub Pages 的 Jekyll 处理，让文件按原样发布 |
 
 > 地图数据会优先读取同目录下的 `us-atlas-states-10m.json`，读取失败时自动回落到 jsDelivr CDN。两个文件放在同一目录即可离线使用。
 
