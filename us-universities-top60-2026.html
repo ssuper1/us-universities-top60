@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>美国高校排名 Top 60 · 2026 U.S. News 全美综合大学 / 计算机专业</title>
+<style>
+  :root{
+    --bg:#f6f6f4; --card:#ffffff; --line:rgba(0,0,0,.10);
+    --t1:#1c1c1a; --t2:#5f5e5a; --t3:#8b8a84;
+    --blue-bg:#e6f1fb; --blue-tx:#185fa5;
+    --pur-bg:#eeedfe; --pur-tx:#534ab7;
+    --gray-bg:#f1efe8; --gray-tx:#5f5e5a;
+    --up:#0f6e56; --down:#993c1d;
+    --warn-bg:#fdf3e0; --warn-tx:#8a5b00;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--t1);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    font-size:14px;line-height:1.65;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:980px;margin:0 auto;padding:40px 24px 72px}
+  h1{font-size:24px;font-weight:600;margin:0 0 6px;letter-spacing:-.2px}
+  .hrow{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 0 6px}
+  .hrow h1{margin:0}
+  .trust{font-size:11.5px;line-height:1.5;color:var(--warn-tx);background:var(--warn-bg);
+    border:.5px solid rgba(150,102,0,.24);border-radius:6px;padding:2px 8px;max-width:100%}
+  .trust b{font-weight:600}
+  @media (max-width:640px){.trust{font-size:11px}}
+  .meta{color:var(--t3);font-size:13px;margin:0 0 28px;line-height:1.7}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:28px}
+  .card{background:var(--card);border:.5px solid var(--line);border-radius:12px;padding:16px 18px}
+  .card .k{font-size:12px;color:var(--t3);margin:0 0 4px}
+  .card .v{font-size:20px;font-weight:600;margin:0}
+  .card .s{font-size:12px;color:var(--t2);margin:4px 0 0}
+  .panel{background:var(--card);border:.5px solid var(--line);border-radius:12px;overflow:hidden}
+  .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:14px 16px;border-bottom:.5px solid var(--line)}
+  .bar.plain{border-bottom:none}
+  .seg{display:inline-flex;background:var(--gray-bg);border-radius:10px;padding:3px;gap:2px}
+  .segbtn{font:inherit;font-size:13px;padding:6px 15px;border:0;border-radius:8px;background:transparent;
+    color:var(--t2);cursor:pointer;white-space:nowrap}
+  .segbtn[aria-pressed=true]{background:var(--card);color:var(--t1);font-weight:500}
+  input[type=search]{font:inherit;font-size:13px;padding:6px 10px;border:.5px solid var(--line);
+    border-radius:8px;background:#fbfbfa;color:var(--t1);width:190px;outline:none}
+  input[type=search]:focus{border-color:var(--blue-tx)}
+  .chip{font:inherit;font-size:12px;padding:5px 12px;border-radius:999px;border:.5px solid var(--line);
+    background:transparent;color:var(--t2);cursor:pointer}
+  .chip[aria-pressed=true]{background:var(--blue-bg);color:var(--blue-tx);border-color:transparent}
+  input[type=number]{font:inherit;font-size:13px;padding:5px 6px;border:.5px solid var(--line);
+    border-radius:8px;background:#fbfbfa;color:var(--t1);width:58px;outline:none;text-align:center;
+    font-variant-numeric:tabular-nums;appearance:textfield;-moz-appearance:textfield}
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  input[type=number]:focus{border-color:var(--blue-tx)}
+  .rlabel{font-size:13px;color:var(--t2)}
+  .rdash{color:var(--t3);font-size:13px;margin:0 -2px}
+  .presets{display:inline-flex;gap:6px;flex-wrap:wrap}
+  .rnote{margin-left:auto;font-size:12px;color:var(--t3)}
+  .rnote.warn{color:var(--down)}
+  .bar.rngbar{border-bottom:.5px solid var(--line);padding-top:10px;padding-bottom:8px}
+  .rngbox{flex:1 1 240px;min-width:160px}
+  .rngrailwrap{position:relative;height:24px}
+  .rngline,.rngtrack{position:absolute;top:50%;left:8px;right:8px;height:4px;margin-top:-2px;
+    border-radius:2px;cursor:pointer}
+  .rngline{background:var(--gray-bg)}
+  .rngtrack{overflow:hidden}
+  /* 填充条的父级与刻度同宽（都内缩 8px = 半个手柄），百分比才和手柄行程一一对应 */
+  .rngfill{position:absolute;top:0;bottom:0;left:0;background:var(--blue-tx);border-radius:2px}
+  .rngrailwrap input[type=range]{position:absolute;left:0;top:0;width:100%;height:24px;margin:0;
+    background:none;border:0;padding:0;-webkit-appearance:none;appearance:none;
+    pointer-events:none;outline:none}
+  .rngrailwrap input[type=range]::-webkit-slider-runnable-track{height:24px;background:none;border:0}
+  .rngrailwrap input[type=range]::-moz-range-track{height:24px;background:none;border:0}
+  .rngrailwrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;
+    width:16px;height:16px;margin-top:4px;border-radius:50%;background:var(--card);
+    border:2px solid var(--blue-tx);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:grab}
+  .rngrailwrap input[type=range]::-moz-range-thumb{pointer-events:auto;width:12px;height:12px;border:2px solid var(--blue-tx);
+    border-radius:50%;background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:grab}
+  .rngrailwrap input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1.08)}
+  .rngrailwrap input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px var(--blue-bg)}
+  .rngrailwrap input[type=range]:focus-visible::-moz-range-thumb{box-shadow:0 0 0 4px var(--blue-bg)}
+  .rngticks{position:relative;height:15px;margin:0 8px;font-size:10.5px;color:var(--t3);
+    font-variant-numeric:tabular-nums;line-height:15px}
+  .rngticks span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
+  .rngticks span.first{transform:none}
+  .rngticks span.last{transform:translateX(-100%)}
+  .rngval{font-size:12px;color:var(--t2);font-variant-numeric:tabular-nums;white-space:nowrap;
+    min-width:64px;text-align:right}
+  .rngval.approx::before{content:"≈ ";font-size:11px;color:var(--t3)}
+  .count{margin-left:auto;font-size:12px;color:var(--t3)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:760px}
+  th{position:sticky;top:0;background:var(--card);text-align:left;font-weight:500;font-size:12px;
+    color:var(--t2);padding:10px 16px;border-bottom:.5px solid var(--line);white-space:nowrap;z-index:2}
+  td{padding:9px 16px;border-bottom:.5px solid var(--line);vertical-align:middle}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:#fafaf8}
+  .rk{font-weight:600;font-variant-numeric:tabular-nums}
+  .cn{font-weight:500}
+  .schlink{font-weight:500;color:var(--t1);text-decoration:none;cursor:pointer;
+    border-bottom:1px solid rgba(24,95,165,.45)}
+  .schlink:hover{color:var(--blue-tx);border-bottom-color:var(--blue-tx)}
+  .schlink::after{content:"↗";font-size:10.5px;margin-left:3px;vertical-align:1px;opacity:.55}
+  .schlink:hover::after{opacity:1}
+  /* 综合排名前 30：可点、跳官网首页，但外观与纯文本完全一致（无下划线、无 ↗ 标记），以此与 30 名以后的入学要求链接区分 */
+  .schlink.plain,.schlink.plain:hover{color:var(--t1);border-bottom:0}
+  .schlink.plain::after{display:none}
+  .en{display:block;font-size:11.5px;color:var(--t3);margin-top:1px}
+  .stlink{font:inherit;font-size:13.5px;color:var(--t2);background:none;border:0;padding:0;cursor:pointer;
+    border-bottom:.5px dashed rgba(0,0,0,.3);white-space:nowrap}
+  .stlink:hover{color:var(--blue-tx);border-bottom-color:var(--blue-tx)}
+  .stlink::after{content:" ⌖";font-size:11px;opacity:.7}
+  .tag{display:inline-block;font-size:11.5px;padding:1px 7px;border-radius:5px;white-space:nowrap}
+  .tag.u{background:var(--blue-bg);color:var(--blue-tx)}
+  .tag.i{background:var(--pur-bg);color:var(--pur-tx)}
+  .tag.p{background:var(--gray-bg);color:var(--gray-tx)}
+  .bing{display:inline-flex;align-items:center;gap:4px;font-size:12px;line-height:1;padding:5px 9px;
+    border:.5px solid var(--line);border-radius:7px;background:#fbfbfa;color:var(--blue-tx);
+    text-decoration:none;white-space:nowrap}
+  .bing:hover{background:var(--blue-bg);border-color:transparent}
+  .up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--t3)}
+  .mini{font-size:12px;color:var(--t2);white-space:nowrap}
+  .csrk{font-variant-numeric:tabular-nums;cursor:help}
+  .csrk.top{font-weight:600;color:var(--blue-tx)}
+  .csrk.off{color:var(--t3)}
+  .tbl-scroll{overflow:auto}
+  h2{font-size:16px;font-weight:600;margin:36px 0 10px}
+  .notes{background:var(--card);border:.5px solid var(--line);border-radius:12px;padding:4px 22px 18px}
+  .notes p{margin:14px 0;color:var(--t1)}
+  .notes li{margin:8px 0}
+  .notes ul{padding-left:20px;margin:12px 0}
+  .hint{color:var(--t2);font-size:13px}
+  footer{color:var(--t3);font-size:12px;margin-top:28px;line-height:1.8}
+  .ov{position:fixed;inset:0;z-index:60;background:rgba(22,22,20,.46);display:flex;align-items:center;
+    justify-content:center;padding:20px}
+  .ov[hidden]{display:none}
+  .ovbox{background:var(--card);border-radius:14px;width:100%;max-width:660px;padding:18px 20px 14px;
+    border:.5px solid var(--line);max-height:92vh;overflow:auto}
+  .ovhd{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+  .ovt{font-size:15px;font-weight:600;margin:0}
+  .ovs{font-size:12px;color:var(--t3);margin:3px 0 0}
+  .ovbtn{font:inherit;font-size:12px;margin-left:auto;padding:5px 12px;border-radius:8px;
+    border:.5px solid var(--line);background:#fbfbfa;color:var(--t2);cursor:pointer;flex:none}
+  .ovbtn:hover{background:var(--gray-bg)}
+  #mapbox svg{display:block;width:100%;height:auto;border-radius:10px;background:#fbfbfa}
+  .ovf{font-size:11.5px;color:var(--t3);margin:10px 0 0}
+  .ovleg{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--t2);margin:10px 0 0}
+  .ovleg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+  .ovi{font-size:13px;color:var(--t2);text-align:center;padding:60px 0}
+  /* 回到顶部：小圆钮，宽屏时落在正文栏右侧空白处，窄屏贴边 */
+  #totop{position:fixed;z-index:50;
+    right:max(14px,calc((100vw - 980px) / 2 - 48px));
+    bottom:20px;width:34px;height:34px;padding:0;
+    display:flex;align-items:center;justify-content:center;
+    border:.5px solid var(--line);border-radius:50%;
+    background:rgba(255,255,255,.9);color:var(--t2);cursor:pointer;
+    box-shadow:0 2px 8px rgba(0,0,0,.10);
+    opacity:0;transform:translateY(8px);pointer-events:none;
+    transition:opacity .18s ease,transform .18s ease,background .15s ease,color .15s ease,border-color .15s ease}
+  #totop.on{opacity:.72;transform:none;pointer-events:auto}
+  #totop.on:hover,#totop.on:focus-visible{opacity:1;background:#fff;color:var(--blue-tx);border-color:transparent}
+  #totop svg{display:block;width:15px;height:15px}
+  @media (prefers-reduced-motion:reduce){#totop{transition:none}}
+  @media (max-width:640px){
+    .wrap{padding:24px 14px 48px}
+    th,td{padding:8px 10px}
+    input[type=search]{width:100%}
+    .count{display:none}
+    #totop{right:10px;bottom:12px;width:32px;height:32px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hrow">
+    <h1>美国高校排名 Top 60</h1>
+    <span class="trust" title="名次由公开榜单整理并经多源交叉核对得出，并非从 U.S. News 官网直接采集。官方表格页只公开前 10 名，部分指标位于 College Compass 付费墙之后，因此第 40–60 名区间、以及本科 CS 榜第 48 / 54 名两档更依赖二手来源互相印证，可能存在个别偏差。用作申请决策前请以 U.S. News 官网原榜为准。">⚠ <b>数据可信度有限</b>：由公开榜单整理 + 多源交叉核对而来，<b>非官方直采</b>，个别名次可能有偏差 · 请以 U.S. News 官网为准</span>
+  </div>
+  <p class="meta">U.S. News 2026 全美最佳综合大学排名（前 60，因大量并列实际覆盖到第 59 名、共 63 所，表中已附「计算机排名」列） + 2026 最佳本科计算机科学排名（前 60，并列结构下覆盖到第 54 名、共 62 所） · 综合榜发布于 2025 年 9 月 · 2027 版预计 2026 年 9 月 22 日上线</p>
+
+  <div class="cards">
+    <div class="card">
+      <p class="k">综合榜首三名</p>
+      <p class="v">普林斯顿 · MIT · 哈佛</p>
+      <p class="s">普林斯顿连续 15 年蝉联全美第一</p>
+    </div>
+    <div class="card">
+      <p class="k">榜单 63 所中 公立 / 私立</p>
+      <p class="v">28 / 35</p>
+      <p class="s">公立第一：伯克利（第 15，今年反超 UCLA）</p>
+    </div>
+    <div class="card">
+      <p class="k">CS 第一梯队</p>
+      <p class="v">MIT · CMU · 斯坦福 · 伯克利</p>
+      <p class="s">佐治亚理工、普林斯顿并列第 5</p>
+    </div>
+    <div class="card">
+      <p class="k">CS 前 60 的实际范围</p>
+      <p class="v">62 所 · 到第 54 名</p>
+      <p class="s">官方公开名次止于第 54 名，下一档直接跳到第 63 名</p>
+    </div>
+    <div class="card">
+      <p class="k">综合 / CS 名次差最大</p>
+      <p class="v">华盛顿大学 42 → 9</p>
+      <p class="s">亚利桑那州立 117 → 48、科罗拉多博尔德 97 → 30</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="bar">
+      <div class="seg" role="group" aria-label="榜单类型">
+        <button class="segbtn" data-v="ov" aria-pressed="true">综合排名（前 60）</button>
+        <button class="segbtn" data-v="cs" aria-pressed="false">计算机专业排名（前 60）</button>
+      </div>
+      <span class="count" id="vcount">按 U.S. News 2026 全美综合大学排名</span>
+    </div>
+    <div class="bar">
+      <input id="q" type="search" placeholder="搜索学校名称…" aria-label="搜索学校">
+      <button class="chip" data-k="all" aria-pressed="true">全部</button>
+      <button class="chip" data-k="u" aria-pressed="false">只看公立</button>
+      <button class="chip" data-k="p" aria-pressed="false">只看私立</button>
+      <button class="chip" data-k="i" aria-pressed="false">只看常春藤</button>
+      <span class="count" id="count">共 63 所</span>
+    </div>
+    <div class="bar plain">
+      <span class="rlabel">名次区间</span>
+      <input id="rmin" type="number" min="1" max="60" step="1" inputmode="numeric" placeholder="起" aria-label="起始名次">
+      <span class="rdash">–</span>
+      <input id="rmax" type="number" min="1" max="60" step="1" inputmode="numeric" placeholder="止" aria-label="结束名次">
+      <span class="presets" id="presets"></span>
+      <span class="rnote" id="rnote"></span>
+    </div>
+    <div class="bar plain rngbar">
+      <span class="rlabel">名次滑轨</span>
+      <div class="rngbox">
+        <div class="rngrailwrap">
+          <div class="rngline"></div>
+          <div class="rngtrack"><div class="rngfill" id="rfill"></div></div>
+          <input id="rlo" type="range" min="0" max="6" step="1" value="0"
+                 aria-label="起始名次滑轨，每 10 名一档">
+          <input id="rhi" type="range" min="0" max="6" step="1" value="6"
+                 aria-label="结束名次滑轨，每 10 名一档">
+        </div>
+        <div class="rngticks" id="rticks"></div>
+      </div>
+      <span class="rngval" id="rval">不限</span>
+    </div>
+    <div class="tbl-scroll">
+      <table>
+        <colgroup id="cg"></colgroup>
+        <thead id="thd"></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </div>
+  <p class="hint" style="margin:10px 2px 0">综合排名视图里已附<strong>「计算机排名」列</strong>（U.S. News 2026 本科 CS 榜名次，显示「—」表示未进前 54 名，鼠标悬停可看两个榜的落差），切到「计算机专业排名」则整套表换成 CS 榜、第 5 列反过来显示综合名次，两榜可互相对照；官方本科 CS 榜只公开到第 54 名，按并列结构即 62 所。上方<strong>「名次区间」</strong>可按当前榜的名次筛选：直接填起止数字、点 1–10 / 11–30 / 31–60 预设，或拖动<strong>「名次滑轨」</strong>的两个手柄（左＝起点、右＝终点，每 10 名吸附一档；<strong>在轨道上单击或按住拖动</strong>也能直接跳到该档位）——三种操作共用同一组数值，两边留空即不限（综合视图按综合名次、CS 视图按 CS 名次）。点击「所在州」弹出美国地图定位；点击「Bing」在新标签页搜索该校。<strong>校名本身也可点</strong>，按名次分两种：<strong>综合排名前 30</strong> 的学校跳转<strong>该校官网首页</strong>（外观与纯文本完全相同，<strong>不带下划线</strong>，靠鼠标指针和悬停提示区分——悬停会显示目标网址）；<strong>综合排名第 30 名及以后</strong>的学校跳转<strong>该校官网的研究生入学要求页</strong>（<strong>带下划线 + ↗ 标记</strong>，内容是 GPA、学历、语言成绩等硬门槛，与前者用下划线明确区分）。</p>
+
+  <div class="notes" style="margin:14px 0 0">
+    <p><strong>关于「研究生入学要求」链接</strong>：这批链接是我在 2026-09-12 逐校打开官网核对过的，优先指向官方写明「最低入学要求 / Minimum Requirements」的那一页，而不是笼统的招生首页。<strong>本轮（9-12 晚）又整体复检了一遍</strong>：原有 45 条链接逐条请求验证——41 条直接返回正常页面；UC 戴维斯、UC 默塞德、明尼苏达三校官网对自动请求返回 403，改用浏览器方式打开确认页面正常；乔治华盛顿大学（graduate.admissions.gwu.edu）整站被 Cloudflare 拦截，脚本和浏览器都进不去，只能确认域名有效、无法验证页面内容，点击前请留意。另有 15 条链接本轮换成了更贴题的一页（下表）。几点使用提示：</p>
+    <ul>
+      <li><strong>本轮改动的 15 条链接</strong>：UT 奥斯汀（→ /admissions/apply）、普渡（→ /admissions/how-to-apply/）、德州农工（→ 国际生研究生页）三条是用户提供的；其余 12 条由本次巡检替换——UC 戴维斯（→ /minimum-requirements，页面标题就是「Admissions Minimum Requirements」）、UCSB（→ 申请与录取清单）、罗格斯（→ /application-requirements）、佐治亚大学（→ /requirements/）、凯斯西储（→ /instructions-requirements）、弗吉尼亚理工（→ /how-to-apply.html）、维克森林（→ 截止日期与项目要求）、UC 默塞德（→ 学术与申请要求，写明最低 GPA 3.0）、宾州州立（→ /how-to-apply）、马萨诸塞大学安姆斯特（→ /apply/how-apply）、UC 河滨（→ /admission-requirements）、科罗拉多博尔德（→ 写明 Minimum Admissions Requirements）。</li>
+      <li><strong>美国研究生院普遍是「双重门槛」</strong>：研究生院（Graduate School）定全校最低线，各系/项目再定更高的线。你在官网上看到的「最低要求」通常只是"够资格被受理"，实际录取线更高。比如 UF 全校最低 3.0，但很多系要求 3.5+。</li>
+      <li><strong>最低 GPA 常见写法是 3.0 / 4.0</strong>（UW、UT Austin、UF、UMD、Minnesota 均是），少数校写 2.75（理海）；另有不少校按「最后 60 学分 / 高年级课程」单独计算 GPA，比四年总 GPA 更容易达标——这对大三才发力的人有利。</li>
+      <li><strong>语言线各校不同</strong>：常见是托福 80–90 / 雅思 6.5–7.0，个别项目更高。注意 UF 已公告 2027 春季起改用新的英语测评标准。</li>
+      <li><strong>校名没有链接的两种情况</strong>：一种是综合排名前 30（按你的要求本次只做 30 及以后）；另一种是官网没有集中写「研究生最低要求」的独立页面（例如圣塔克拉拉是各学院分别招生，这里给的是官方研究生项目总入口）。</li>
+      <li><strong>页面会变</strong>：招生要求每年更新，申请前请以官网当年页面为准；若链接失效，用「Bing」列搜该校即可。</li>
+    </ul>
+  </div>
+
+  <h2>榜单怎么看</h2>
+  <div class="notes">
+    <p><strong>综合榜是“本科 + 本土就业”导向的榜单。</strong>U.S. News 全美综合大学排名看重学生培养成果（毕业率、留校率、毕业生负债与收入）、本科学术声誉、师资与经费，是留美读本科、在美求职最常用的参考。如果你看的是科研产出与论文影响力，应该参考 U.S. News 全球最佳大学排名或软科 ARWU。</p>
+    <ul>
+      <li><strong>Top 10 很稳</strong>：普林斯顿、MIT、哈佛、斯坦福、耶鲁、芝加哥、杜克、JHU、西北、宾大。今年的变化主要是芝加哥大学从第 11 升至第 6，加州理工从第 6 退到第 11。</li>
+      <li><strong>藤校全在前 20</strong>：普林斯顿、哈佛、耶鲁、宾大、布朗、达特茅斯、哥大、康奈尔。达特茅斯、哥大并列第 13、15。</li>
+      <li><strong>公立旗舰最值得关注</strong>：伯克利第 15（今年重夺公立第一）、UCLA 第 17（去年还是公立第一，今年与伯克利互换）、密歇根安娜堡第 20、北卡教堂山与弗吉尼亚第 26、UCSD 第 29、佛罗里达与 UT 奥斯汀第 30。同样的学术水平，学费显著低于私立。</li>
+      <li><strong>第 51–59 名这一段</strong>：凯斯西储（私立理工强）、佛罗里达州立、德州农工、弗吉尼亚理工、维克森林、威廉与玛丽（公立，本科教学口碑好、性价比高）、加州大学默塞德（UC 系最年轻的分校）、维拉诺瓦、乔治华盛顿（DC 地利，国际关系与政治强）、宾州州立、圣塔克拉拉（硅谷腹地）、纽约州立石溪（SUNY 理工强）、明尼苏达双城。</li>
+      <li><strong>地域分布</strong>：加州最集中（11 所：斯坦福、加州理工、伯克利、UCLA、UCSD、UC 戴维斯、UC 尔湾、UCSB、南加大、UC 默塞德、圣塔克拉拉），其次马萨诸塞州 6 所（MIT、哈佛、波士顿学院、塔夫茨、波士顿大学、东北大学），宾夕法尼亚州 5 所（宾大、CMU、理海、维拉诺瓦、宾州州立），纽约州 5 所（康奈尔、哥大、纽约大学、罗切斯特、石溪），伊利诺伊州、北卡罗来纳州、得克萨斯州、佐治亚州、弗吉尼亚州各 3 所。上表点州名即可在地图上核对位置。</li>
+      <li><strong>注意并列</strong>：榜单大量并列（第 7 名 4 所、第 20 名 4 所、第 32 名 4 所、第 42 名 4 所、第 46 名 5 所、第 51 名 6 所、第 59 名 5 所），所以“前 60”实际是 63 所学校、最低名次到第 59 名。</li>
+    </ul>
+    <p class="hint">提示：2026 版之所以格外稳定，是因为毕业生收入/负债数据沿用上一年（College Scorecard 未更新），且没有学校变更排名类别。2027 版将首次引入“分专业收入”（Earnings by Major）指标，预计对工程、商科、CS 强势的学校更有利，而以人文社科为主、学费高的私立文理院校压力更大。</p>
+  </div>
+
+  <h2>计算机专业排名怎么看</h2>
+  <div class="notes">
+    <p><strong>CS 榜和综合榜是两套完全不同的尺子。</strong>美国本科计算机科学排名由各校计算机系主任与资深教授互相打分（同行评估）得出，不看录取率、学费、经费，几乎只看“这个系在学术圈的口碑”。所以它更贴近“读 CS 该去哪”，而不是“这所学校整体有多强”。</p>
+    <p><strong>关于“前 60”要说清楚一件事</strong>：全美共 601 个本科 CS 项目进入这个榜单，但 U.S. News 公开的名次是一段一段、跳着走的——第 45 名 3 所 → 第 48 名 6 所 → 第 54 名 9 所，再往下直接跳到第 63 名。所以“前 60”事实上覆盖到<strong>第 54 名、共 62 所</strong>；第 55–62 名这一段在官方榜上是空号，不是漏了数据。</p>
+    <ul>
+      <li><strong>第 48 名（6 所，本次新纳入）</strong>：亚利桑那州立大学、波士顿大学、北卡罗来纳州立大学、伦斯勒理工学院（RPI）、加州大学圣克鲁兹分校、佛罗里达大学。</li>
+      <li><strong>第 54 名（9 所，本次新纳入）</strong>：印第安纳大学伯明顿分校、密歇根州立大学、塔夫茨大学、亚利桑那大学、加州大学河滨分校、纽约州立大学石溪分校、罗切斯特理工学院（RIT）、罗格斯大学新布朗斯维克分校、威廉与玛丽学院。这一档很有意思：既有 RIT 这种 Co-op 就业极强、游戏设计全美第 3 的实践型理工校，也有石溪、罗格斯这种 CS 体量极大的公立旗舰，还有威廉与玛丽这种本科教学口碑好、CS 只有 60 多人却和几万人规模的州立旗舰并列的文理型公立校。</li>
+      <li><strong>名次被综合榜严重低估的一批</strong>：华盛顿大学（综合 42 → CS 9）、UIUC（36 → 7）、普渡（46 → 16）、马里兰帕克（42 → 16）、亚利桑那州立（117 → 48）、科罗拉多博尔德（97 → 30）、马萨诸塞大学安姆斯特（64 → 35）。这些是典型的“看 CS 就值、看综排会错过”的学校。</li>
+      <li><strong>被 CS 榜“降级”的名校</strong>：耶鲁（综合 4 → CS 16）、达特茅斯（13 → 39）、范德堡（17 → 39）、圣母（20 → 45）、圣路易斯华盛顿（20 → 45）——综合榜高不代表计算机系强。</li>
+      <li><strong>只在 CS 视图出现的 12 所</strong>（不在综合前 60）：哈维穆德学院（CS 25，文理学院，本来就不参与综合大学排名）、科罗拉多大学博尔德（30）、马萨诸塞大学安姆斯特（35）、亚利桑那州立（48）、北卡州立（48）、伦斯勒理工（48）、加州大学圣克鲁兹（48）、印第安纳伯明顿（54）、密歇根州立（54）、亚利桑那大学（54）、加州大学河滨（54）、罗切斯特理工（54）。</li>
+      <li><strong>进不了 CS 前 60 的 13 所</strong>（综合榜前 60 里）：埃默里、乔治城、波士顿学院、理海、佐治亚大学、罗切斯特、凯斯西储、佛罗里达州立、维克森林、加州大学默塞德、维拉诺瓦、乔治华盛顿、圣塔克拉拉。切到 CS 视图它们会消失，属正常现象。</li>
+      <li><strong>CS 第一梯队</strong>：MIT、卡内基梅隆、斯坦福、加州大学伯克利并列最前；佐治亚理工与普林斯顿并列第 5。</li>
+    </ul>
+    <p class="hint">重要提醒：网上流传的“斯坦福第 1、CMU 与 MIT 并列第 2”的 CS 榜单，是 <strong>2026 年 4 月发布的研究生 CS 排名</strong>，不是本科榜。两套榜单差异明显——研究生榜里马萨诸塞大学安姆斯特、犹他大学、石溪、罗格斯等研究型强校名次高得多。本页用的是本科榜（2025 年 9 月发布）：MIT 第 1。别混用。另外 CS 榜并列极其密集（第 2 名 3 所、第 16 名 8 所、第 39 名 6 所、第 48 名 6 所、第 54 名 9 所），同名次内部不代表优劣顺序。</p>
+  </div>
+
+  <h2>其他常被引用的美国高校榜单</h2>
+  <div class="notes">
+    <ul>
+      <li><strong>Niche 2027 全美最佳大学（2026 年 9 月初已发布）</strong>：被称为“美国大学版大众点评”，指标为学术 35%（今年下调 5%）、性价比 27.5%、教授质量 7.5%，并新增 5% 的“院校成功得分”。前十为 MIT、斯坦福、耶鲁、哈佛、普林斯顿、加州理工、范德堡、达特茅斯、哥大、莱斯。因学术权重下调 + 性价比权重不变，纽约大学从第 34 跌至第 59，乔治城、南加大、塔夫茨、波士顿学院等学费高的城市私立校集体下滑，而 UCLA 升至第 17 重夺公立第一。</li>
+      <li><strong>U.S. News 全球最佳大学排名 2026–2027（科研导向）</strong>：美国约 39 所进入全球百强、22 所进入全球前 50。哈佛全球第一，MIT、斯坦福紧随其后，伯克利、耶鲁、哥大均在全球前十；加州大学系统 8 所分校全部进入全球百强。该榜单超过 85% 权重用于科研产出与声誉，是申硕博、走学术路线的主要参考。</li>
+      <li><strong>U.S. News 研究生 CS 排名（2026 年 4 月发布）</strong>：前三为 CMU、MIT、斯坦福并列第 1，伯克利第 4、UIUC 第 5。这份榜的名次基准与本科榜不同（本科榜 MIT 独居第 1），且研究者导向更强，申硕士/博士应看这份。</li>
+      <li><strong>QS 世界大学排名</strong>：偏国际化与雇主声誉，同一所学校在两个榜单上的名次可能相差很大（例如达特茅斯在 U.S. News 全美第 13，在 QS 世界排名中则明显靠后）。选校时建议以目标为准：留美就业看 U.S. News 全美榜，走学术看全球榜，看就读体验看 Niche。</li>
+    </ul>
+  </div>
+
+  <footer>
+    数据来源：U.S. News &amp; World Report《2026 Best National Universities》与《2026 Best Undergraduate Computer Science Programs》官方榜单及公开整理，其中本科 CS 榜第 48 名、第 54 名两档的名次以威廉与玛丽学院、印第安纳大学等校官方公布的 2026 排名公告交叉核实；Niche 2027 排名、U.S. News 全球排名相关数据来自公开媒体报道。地图为美国州界拓扑（us-atlas / U.S. Census Bureau）示意图，点位为学校所在城市的大致坐标，不代表精确校区范围。排名每年变动，用作申请决策前请以官方最新发布为准。<br>
+    校名链接为各校官网的研究生入学要求 / 申请要求页面，采集并逐一核验于 2026-09-12（共 45 所，覆盖综合排名第 30 名及以后的全部学校，以及只在 CS 榜出现的学校）。入学要求以官网当年页面为准。<br>
+    本文件生成于 2026-09-12。
+  </footer>
+</div>
+
+<button id="totop" type="button" aria-label="回到顶部" title="回到顶部">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V6"/><path d="M6 12l6-6 6 6"/></svg>
+</button>
+
+<div class="ov" id="ov" hidden>
+  <div class="ovbox" role="dialog" aria-modal="true" aria-labelledby="ovt">
+    <div class="ovhd">
+      <div>
+        <p class="ovt" id="ovt">—</p>
+        <p class="ovs" id="ovs">—</p>
+      </div>
+      <button class="ovbtn" id="ovx">关闭 Esc</button>
+    </div>
+    <div id="mapbox"><p class="ovi">地图加载中…</p></div>
+    <div class="ovleg">
+      <span><i style="background:#b5d4f4;border:.5px solid #185fa5"></i>该校所在州</span>
+      <span><i style="background:#185fa5;border-radius:50%"></i>学校所在城市（大致）</span>
+    </div>
+    <p class="ovf">地图为示意图，用于判断所在州的相对位置与邻州关系，非精确校区范围。</p>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script>
+const STATES = {
+  AL:['01','亚拉巴马州'], AK:['02','阿拉斯加州'], AZ:['04','亚利桑那州'], AR:['05','阿肯色州'],
+  CA:['06','加利福尼亚州'], CO:['08','科罗拉多州'], CT:['09','康涅狄格州'], DE:['10','特拉华州'],
+  DC:['11','华盛顿哥伦比亚特区'], FL:['12','佛罗里达州'], GA:['13','佐治亚州'], HI:['15','夏威夷州'],
+  ID:['16','爱达荷州'], IL:['17','伊利诺伊州'], IN:['18','印第安纳州'], IA:['19','艾奥瓦州'],
+  KS:['20','堪萨斯州'], KY:['21','肯塔基州'], LA:['22','路易斯安那州'], ME:['23','缅因州'],
+  MD:['24','马里兰州'], MA:['25','马萨诸塞州'], MI:['26','密歇根州'], MN:['27','明尼苏达州'],
+  MS:['28','密西西比州'], MO:['29','密苏里州'], MT:['30','蒙大拿州'], NE:['31','内布拉斯加州'],
+  NV:['32','内华达州'], NH:['33','新罕布什尔州'], NJ:['34','新泽西州'], NM:['35','新墨西哥州'],
+  NY:['36','纽约州'], NC:['37','北卡罗来纳州'], ND:['38','北达科他州'], OH:['39','俄亥俄州'],
+  OK:['40','俄克拉何马州'], OR:['41','俄勒冈州'], PA:['42','宾夕法尼亚州'], RI:['44','罗得岛州'],
+  SC:['45','南卡罗来纳州'], SD:['46','南达科他州'], TN:['47','田纳西州'], TX:['48','得克萨斯州'],
+  UT:['49','犹他州'], VT:['50','佛蒙特州'], VA:['51','弗吉尼亚州'], WA:['53','华盛顿州'],
+  WV:['54','西弗吉尼亚州'], WI:['55','威斯康星州'], WY:['56','怀俄明州']
+};
+
+/* [中文名, 英文名, 州缩写, 类型(p私立/i常春藤/u公立), 综合排名(0=不参与综合大学排名), 2025综合排名(0=未知), 所在城市, 纬度, 经度, CS排名(0=未入CS前60), 研究生入学要求页(仅综合排名30及以后收录，空=未收录)] */
+const D = [
+ ["普林斯顿大学","Princeton University","NJ","i",1,1,"普林斯顿",40.348,-74.660,5],
+ ["麻省理工学院","Massachusetts Institute of Technology","MA","p",2,2,"剑桥",42.359,-71.093,1],
+ ["哈佛大学","Harvard University","MA","p",3,3,"剑桥",42.377,-71.117,12],
+ ["斯坦福大学","Stanford University","CA","p",4,4,"斯坦福",37.428,-122.169,2],
+ ["耶鲁大学","Yale University","CT","i",4,5,"纽黑文",41.316,-72.922,16],
+ ["芝加哥大学","University of Chicago","IL","p",6,11,"芝加哥",41.789,-87.600,25],
+ ["杜克大学","Duke University","NC","p",7,6,"达勒姆",36.001,-78.939,24],
+ ["约翰斯·霍普金斯大学","Johns Hopkins University","MD","p",7,6,"巴尔的摩",39.329,-76.620,16],
+ ["西北大学","Northwestern University","IL","p",7,6,"埃文斯顿",42.056,-87.675,30],
+ ["宾夕法尼亚大学","University of Pennsylvania","PA","i",7,10,"费城",39.952,-75.193,16],
+ ["加州理工学院","California Institute of Technology","CA","p",11,6,"帕萨迪纳",34.137,-118.125,9],
+ ["康奈尔大学","Cornell University","NY","i",12,11,"伊萨卡",42.454,-76.476,7],
+ ["布朗大学","Brown University","RI","i",13,13,"普罗维登斯",41.826,-71.403,25],
+ ["达特茅斯学院","Dartmouth College","NH","i",13,13,"汉诺威",43.704,-72.289,39],
+ ["哥伦比亚大学","Columbia University","NY","i",15,13,"纽约",40.807,-73.962,16],
+ ["加州大学伯克利分校","University of California, Berkeley","CA","u",15,17,"伯克利",37.872,-122.258,2],
+ ["莱斯大学","Rice University","TX","p",17,18,"休斯敦",29.717,-95.402,30],
+ ["加州大学洛杉矶分校","University of California, Los Angeles","CA","u",17,15,"洛杉矶",34.072,-118.444,15],
+ ["范德堡大学","Vanderbilt University","TN","p",17,18,"纳什维尔",36.145,-86.803,39],
+ ["卡内基梅隆大学","Carnegie Mellon University","PA","p",20,21,"匹兹堡",40.443,-79.944,2],
+ ["密歇根大学安娜堡分校","University of Michigan, Ann Arbor","MI","u",20,21,"安娜堡",42.278,-83.738,12],
+ ["圣母大学","University of Notre Dame","IN","p",20,18,"圣母镇",41.705,-86.235,45],
+ ["圣路易斯华盛顿大学","Washington University in St. Louis","MO","p",20,21,"圣路易斯",38.648,-90.305,45],
+ ["埃默里大学","Emory University","GA","p",24,24,"亚特兰大",33.793,-84.324,0],
+ ["乔治城大学","Georgetown University","DC","p",24,24,"华盛顿",38.908,-77.073,0],
+ ["北卡罗来纳大学教堂山分校","University of North Carolina, Chapel Hill","NC","u",26,27,"教堂山",35.912,-79.052,30],
+ ["弗吉尼亚大学","University of Virginia","VA","u",26,24,"夏洛茨维尔",38.035,-78.503,39],
+ ["南加州大学","University of Southern California","CA","p",28,27,"洛杉矶",34.022,-118.285,16],
+ ["加州大学圣地亚哥分校","University of California, San Diego","CA","u",29,29,"拉霍亚",32.880,-117.234,12],
+ ["佛罗里达大学","University of Florida","FL","u",30,30,"盖恩斯维尔",29.646,-82.345,48,"https://gradcatalog.ufl.edu/graduate/admission"],
+ ["德克萨斯大学奥斯汀分校","University of Texas at Austin","TX","u",30,30,"奥斯汀",30.286,-97.739,9,"https://graduate.utexas.edu/admissions/apply"],
+ ["佐治亚理工学院","Georgia Institute of Technology","GA","u",32,33,"亚特兰大",33.775,-84.396,5,"https://grad.gatech.edu/admissions"],
+ ["纽约大学","New York University","NY","p",32,30,"纽约",40.729,-73.996,30,"https://www.nyu.edu/admissions/graduate-admissions/application-requirements.html"],
+ ["加州大学戴维斯分校","University of California, Davis","CA","u",32,33,"戴维斯",38.538,-121.752,35,"https://grad.ucdavis.edu/minimum-requirements"],
+ ["加州大学尔湾分校","University of California, Irvine","CA","u",32,33,"尔湾",33.643,-117.842,25,"https://grad.uci.edu/admissions/applying-to-uci/"],
+ ["波士顿学院","Boston College","MA","p",36,37,"牛顿",42.335,-71.169,0,"https://www.bc.edu/bc-web/schools/morrissey/graduate.html"],
+ ["塔夫茨大学","Tufts University","MA","p",36,37,"梅德福",42.408,-71.118,54,"https://asegrad.tufts.edu/applying/requirements"],
+ ["伊利诺伊大学厄巴纳-香槟分校","University of Illinois Urbana-Champaign","IL","u",36,33,"厄巴纳-香槟",40.109,-88.228,7,"https://grad.illinois.edu/admissions/graduate-admissions-minimum-requirements"],
+ ["威斯康星大学麦迪逊分校","University of Wisconsin, Madison","WI","u",36,39,"麦迪逊",43.075,-89.412,16,"https://info.grad.wisc.edu/requirements-for-admission"],
+ ["加州大学圣塔芭芭拉分校","University of California, Santa Barbara","CA","u",40,39,"圣塔芭芭拉",34.414,-119.849,35,"https://www.graddiv.ucsb.edu/admissions/application-and-admission-checklist"],
+ ["俄亥俄州立大学","Ohio State University","OH","u",41,41,"哥伦布",39.999,-83.013,39,"https://gpadmissions.osu.edu/grad/admissions.html"],
+ ["波士顿大学","Boston University","MA","p",42,41,"波士顿",42.350,-71.105,48,"https://www.bu.edu/grad/admission-funding/graduate-admission/"],
+ ["罗格斯大学新布朗斯维克分校","Rutgers University, New Brunswick","NJ","u",42,41,"新布朗斯维克",40.501,-74.450,54,"https://grad.rutgers.edu/admissions/application-requirements"],
+ ["马里兰大学帕克分校","University of Maryland, College Park","MD","u",42,44,"学院公园",38.986,-76.941,16,"https://gradschool.umd.edu/admissions/admissions-requirements"],
+ ["华盛顿大学","University of Washington","WA","u",42,46,"西雅图",47.657,-122.308,9,"https://grad.uw.edu/prospective-students/how-to-apply/requirements/"],
+ ["理海大学","Lehigh University","PA","p",46,46,"伯利恒",40.607,-75.379,0,"https://catalog.lehigh.edu/graduatestudyandresearch/admissiontograduatestudy/"],
+ ["东北大学","Northeastern University","MA","p",46,54,"波士顿",42.340,-71.090,35,"https://graduate.northeastern.edu/admissions-aid/how-to-apply/"],
+ ["普渡大学","Purdue University, West Lafayette","IN","u",46,46,"西拉法叶",40.424,-86.917,16,"https://www.purdue.edu/academics/ogsps/admissions/how-to-apply/"],
+ ["佐治亚大学","University of Georgia","GA","u",46,46,"阿森斯",33.948,-83.374,0,"https://grad.uga.edu/admissions/requirements/"],
+ ["罗切斯特大学","University of Rochester","NY","p",46,44,"罗切斯特",43.128,-77.630,0,"https://www.rochester.edu/college/gradstudies/admissions/"],
+ ["凯斯西储大学","Case Western Reserve University","OH","p",51,51,"克利夫兰",41.504,-81.608,0,"https://case.edu/gradstudies/prospective-students/instructions-requirements"],
+ ["佛罗里达州立大学","Florida State University","FL","u",51,54,"塔拉哈西",30.442,-84.298,0,"https://gradschool.fsu.edu/admissions"],
+ ["德州农工大学","Texas A&M University","TX","u",51,51,"大学城",30.611,-96.343,45,"https://admissions.tamu.edu/apply/international/international-graduate.html"],
+ ["弗吉尼亚理工学院","Virginia Tech","VA","u",51,51,"布莱克斯堡",37.229,-80.424,25,"https://graduateschool.vt.edu/admissions/how-to-apply.html"],
+ ["维克森林大学","Wake Forest University","NC","p",51,46,"温斯顿-塞勒姆",36.135,-80.277,0,"https://graduate.wfu.edu/admissions-application-deadlines/"],
+ ["威廉与玛丽学院","William & Mary","VA","u",51,54,"威廉斯堡",37.271,-76.720,54,"https://www.wm.edu/admission/graduateadmission/"],
+ ["加州大学默塞德分校","University of California, Merced","CA","u",57,58,"默塞德",37.366,-120.425,0,"https://graduatedivision.ucmerced.edu/admissions/prospective-students/apply-now/requirements"],
+ ["维拉诺瓦大学","Villanova University","PA","p",57,58,"维拉诺瓦",40.037,-75.343,0,"https://www.villanova.edu/university/liberal-arts-sciences/graduate-studies/applying-to-villanova.html"],
+ ["乔治华盛顿大学","George Washington University","DC","p",59,63,"华盛顿",38.899,-77.048,0,"https://graduate.admissions.gwu.edu/"],
+ ["宾夕法尼亚州立大学","Pennsylvania State University","PA","u",59,63,"州学院",40.798,-77.860,39,"https://gradschool.psu.edu/admissions/how-to-apply"],
+ ["圣塔克拉拉大学","Santa Clara University","CA","p",59,63,"圣塔克拉拉",37.349,-121.937,0,"https://www.scu.edu/academics/graduate-programs/"],
+ ["纽约州立大学石溪分校","Stony Brook University, SUNY","NY","u",59,58,"石溪",40.914,-73.124,54,"https://www.stonybrook.edu/grad/admissions/"],
+ ["明尼苏达大学双城分校","University of Minnesota, Twin Cities","MN","u",59,54,"明尼阿波利斯",44.974,-93.235,39,"https://grad.umn.edu/admissions/application-instructions"],
+ ["哈维穆德学院","Harvey Mudd College","CA","p",0,0,"克莱蒙特",34.106,-117.710,25],
+ ["科罗拉多大学博尔德分校","University of Colorado Boulder","CO","u",97,0,"博尔德",40.007,-105.266,30,"https://www.colorado.edu/graduateschool/admissions/where-begin"],
+ ["马萨诸塞大学安姆斯特分校","University of Massachusetts Amherst","MA","u",64,58,"安姆斯特",42.388,-72.528,35,"https://www.umass.edu/graduate/apply/how-apply"],
+ ["亚利桑那州立大学","Arizona State University","AZ","u",117,0,"坦佩",33.424,-111.928,48,"https://admission.asu.edu/apply/graduate"],
+ ["北卡罗来纳州立大学","North Carolina State University","NC","u",64,58,"罗利",35.785,-78.682,48,"https://grad.ncsu.edu/admissions/"],
+ ["加州大学圣克鲁兹分校","University of California, Santa Cruz","CA","u",88,0,"圣克鲁兹",36.991,-122.061,48,"https://graduateadmissions.ucsc.edu/how-to-apply/"],
+ ["伦斯勒理工学院","Rensselaer Polytechnic Institute","NY","p",64,0,"特洛伊",42.730,-73.679,48,"https://gradadmissions.rpi.edu/"],
+ ["印第安纳大学伯明顿分校","Indiana University, Bloomington","IN","u",73,0,"伯明顿",39.167,-86.526,54,"https://graduate.indiana.edu/apply/how-to-apply/index.html"],
+ ["密歇根州立大学","Michigan State University","MI","u",64,0,"东兰辛",42.702,-84.482,54,"https://grad.msu.edu/admissions"],
+ ["亚利桑那大学","University of Arizona","AZ","u",127,0,"图森",32.232,-110.950,54,"https://grad.arizona.edu/admissions"],
+ ["加州大学河滨分校","University of California, Riverside","CA","u",75,0,"河滨",33.974,-117.328,54,"https://graduate.ucr.edu/admission-requirements"],
+ ["罗切斯特理工学院","Rochester Institute of Technology","NY","p",88,0,"罗切斯特",43.084,-77.675,54,"https://www.rit.edu/admissions/graduate"]
+];
+
+/* 综合排名前 30 的学校官网首页（校名可点 → 官网首页；外观保持纯文本，不加下划线，以区别于 30 名以后的入学要求链接）。
+   均为 2026-09-12 逐条请求核验通过的官网首页地址。 */
+const SITE = {
+  '普林斯顿大学':'https://www.princeton.edu',
+  '麻省理工学院':'https://www.mit.edu',
+  '哈佛大学':'https://www.harvard.edu',
+  '斯坦福大学':'https://www.stanford.edu',
+  '耶鲁大学':'https://www.yale.edu',
+  '芝加哥大学':'https://www.uchicago.edu',
+  '杜克大学':'https://www.duke.edu',
+  '约翰斯·霍普金斯大学':'https://www.jhu.edu',
+  '西北大学':'https://www.northwestern.edu',
+  '宾夕法尼亚大学':'https://www.upenn.edu',
+  '加州理工学院':'https://www.caltech.edu',
+  '康奈尔大学':'https://www.cornell.edu',
+  '布朗大学':'https://www.brown.edu',
+  '达特茅斯学院':'https://home.dartmouth.edu',
+  '哥伦比亚大学':'https://www.columbia.edu',
+  '加州大学伯克利分校':'https://www.berkeley.edu',
+  '莱斯大学':'https://www.rice.edu',
+  '加州大学洛杉矶分校':'https://www.ucla.edu',
+  '范德堡大学':'https://www.vanderbilt.edu',
+  '卡内基梅隆大学':'https://www.cmu.edu',
+  '密歇根大学安娜堡分校':'https://umich.edu',
+  '圣母大学':'https://www.nd.edu',
+  '圣路易斯华盛顿大学':'https://washu.edu',
+  '埃默里大学':'https://www.emory.edu',
+  '乔治城大学':'https://www.georgetown.edu',
+  '北卡罗来纳大学教堂山分校':'https://www.unc.edu',
+  '弗吉尼亚大学':'https://www.virginia.edu',
+  '南加州大学':'https://www.usc.edu',
+  '加州大学圣地亚哥分校':'https://ucsd.edu'
+};
+
+const TAG = {u:['u','公立'], i:['i','藤校'], p:['p','私立']};
+const VIEW = {
+  ov: {label:'按 U.S. News 2026 全美综合大学排名（附本科计算机排名）', max:60,
+       head:['名次','学校','所在州','类型','计算机排名','对比 2025','搜索'],
+       w:['60px','','104px','64px','96px','92px','84px'], min:880,
+       presets:[[1,10],[11,30],[31,60]]},
+  cs: {label:'按 U.S. News 2026 最佳本科计算机科学排名（前 60，覆盖到第 54 名）', max:54,
+       head:['CS 名次','学校','所在州','类型','综合排名','搜索'],
+       w:['60px','','104px','64px','96px','84px'], min:800,
+       presets:[[1,10],[11,30],[31,54]]}
+};
+let view = 'ov';
+let mode = 'all';
+const rowsEl = document.getElementById('rows');
+const countEl = document.getElementById('count');
+const vcountEl = document.getElementById('vcount');
+const cgEl = document.getElementById('cg');
+const thdEl = document.getElementById('thd');
+const tblEl = thdEl.closest('table');
+const rminEl = document.getElementById('rmin');
+const rmaxEl = document.getElementById('rmax');
+const presetsEl = document.getElementById('presets');
+const rnoteEl = document.getElementById('rnote');
+const railLoEl = document.getElementById('rlo');
+const railHiEl = document.getElementById('rhi');
+const railFillEl = document.getElementById('rfill');
+const railTicksEl = document.getElementById('rticks');
+const rvalEl = document.getElementById('rval');
+const railWrapEl = document.querySelector('.rngrailwrap');
+const railLineEl = document.querySelector('.rngline');
+
+/* 当前名次区间：留空(null) 表示该侧不限 */
+function curRange(){
+  const a = parseInt(rminEl.value, 10), b = parseInt(rmaxEl.value, 10);
+  return [isNaN(a) ? null : a, isNaN(b) ? null : b];
+}
+
+/* 预设按钮的选中态与输入框保持同步 */
+function syncRange(){
+  const [a, b] = curRange();
+  presetsEl.querySelectorAll('.rngbtn').forEach(btn => {
+    const r = btn.dataset.r;
+    let on;
+    if (r === '') on = (a === null && b === null);
+    else { const [x, y] = r.split('-').map(Number); on = (a === x && b === y); }
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+}
+
+/* ---------- 名次滑轨：每 10 名一档，两个手柄分别吸附档位边界 ---------- */
+function railCfg(){
+  const max = VIEW[view].max;
+  const blocks = Math.ceil(max / 10);
+  return {max, blocks,
+    startAt: i => Math.min(1 + 10 * i, max),
+    endAt:   j => Math.min(10 * j, max)};
+}
+
+/* 刻度与刻度标签随视图重建（综合视图 1…60、CS 视图 1…54） */
+function buildRail(){
+  const {max, blocks} = railCfg();
+  /* 两个手柄统一跑在 0..blocks 这套刻度上：手柄视觉位置 = 档位/blocks，
+     与刻度标签、填充条完全同尺（左柄到不了 blocks、右柄到不了 0，见 normalizeRail） */
+  railLoEl.min = 0; railLoEl.max = blocks;
+  railHiEl.min = 0; railHiEl.max = blocks;
+  let t = '';
+  for (let k = 0; k <= blocks; k++){
+    const rk = Math.min(1 + 10 * k, max);
+    const cls = k === 0 ? ' class="first"' : (k === blocks ? ' class="last"' : '');
+    t += '<span' + cls + ' style="left:' + (k / blocks * 100).toFixed(4) + '%">' + rk + '</span>';
+  }
+  railTicksEl.innerHTML = t;
+}
+
+/* 输入框 → 滑轨：只同步手柄位置，不改写输入框里的数字 */
+function syncRail(){
+  const {max, blocks, startAt, endAt} = railCfg();
+  const [a, b] = curRange();
+  const s = a === null ? 1 : Math.max(1, Math.min(a, max));
+  const e = b === null ? max : Math.max(1, Math.min(b, max));
+  let i = Math.max(0, Math.min(Math.floor((s - 1) / 10), blocks - 1));   // 不超过起点的最大档
+  let j = Math.max(1, Math.min(Math.ceil(e / 10), blocks));              // 不小于终点的最小档
+  if (i >= j) i = j - 1;
+  railLoEl.value = i; railHiEl.value = j;
+  const lo = i / blocks * 100, hi = j / blocks * 100;
+  railFillEl.style.left = lo + '%';
+  railFillEl.style.width = (hi - lo) + '%';
+  const onGrid = startAt(i) === s && endAt(j) === e;
+  rvalEl.textContent = (a === null && b === null) ? '不限'
+    : (a === null ? '1–' + e : (b === null ? s + '–' + max : s + '–' + e));
+  rvalEl.classList.toggle('approx', !onGrid);
+  rvalEl.title = onGrid ? '' :
+    '滑轨停在最近的每 10 名档位，实际按上方填写的 ' + s + '–' + e + ' 筛选';
+}
+
+/* 手柄归一化：左柄 ≤ blocks-1、右柄 ≥ 1、左 < 右；被拖的那个优先，越界时推另一个 */
+function normalizeRail(i, j, who, blocks){
+  i = Math.max(0, Math.min(i, blocks));
+  j = Math.max(0, Math.min(j, blocks));
+  if (i >= j){
+    if (who === 'lo') j = i + 1;
+    else i = j - 1;
+  }
+  if (j > blocks){ j = blocks; i = Math.min(i, blocks - 1); }
+  if (i < 0){ i = 0; j = Math.max(j, 1); }
+  return [i, j];
+}
+
+/* 滑轨 → 输入框：把档位换算成名次写回；target 有值时表示直接把 who 这个手柄挪到该档 */
+function applyRail(who, target){
+  const {blocks, startAt, endAt} = railCfg();
+  let i = parseInt(railLoEl.value, 10), j = parseInt(railHiEl.value, 10);
+  if (!(i >= 0)) i = 0;
+  if (!(j >= 0)) j = 0;
+  if (typeof target === 'number'){ if (who === 'lo') i = target; else j = target; }
+  const norm = normalizeRail(i, j, who, blocks);
+  i = norm[0]; j = norm[1];
+  railLoEl.value = i; railHiEl.value = j;
+  rminEl.value = startAt(i);
+  rmaxEl.value = endAt(j);
+  syncRange(); syncRail(); paint();
+}
+
+/* 点击/按住轨道：把较近的那个手柄挪到指针所在的档位 */
+function railIndexAt(clientX){
+  const box = railLineEl.getBoundingClientRect();
+  if (!box.width) return null;
+  const p = Math.max(0, Math.min(1, (clientX - box.left) / box.width));
+  return Math.round(p * railCfg().blocks);
+}
+
+let scrubWho = null;
+railWrapEl.addEventListener('pointerdown', e => {
+  if (e.target === railLoEl || e.target === railHiEl) return;   // 按在手柄上＝拖拽，交给原生
+  const k = railIndexAt(e.clientX);
+  if (k === null) return;
+  const i = parseInt(railLoEl.value, 10) || 0, j = parseInt(railHiEl.value, 10) || 0;
+  scrubWho = Math.abs(k - i) <= Math.abs(k - j) ? 'lo' : 'hi';
+  applyRail(scrubWho, k);
+  try { railWrapEl.setPointerCapture(e.pointerId); } catch (err) {}
+});
+railWrapEl.addEventListener('pointermove', e => {
+  if (!scrubWho) return;
+  const k = railIndexAt(e.clientX);
+  if (k !== null) applyRail(scrubWho, k);
+});
+['pointerup', 'pointercancel'].forEach(t =>
+  railWrapEl.addEventListener(t, () => { scrubWho = null; }));
+
+/* 表头与列宽随视图重建，两个视图列数不同（综合视图多一列「计算机排名」） */
+function renderShell(){
+  const v = VIEW[view];
+  cgEl.innerHTML = v.w.map(w => '<col' + (w ? ' style="width:' + w + '"' : '') + '>').join('');
+  thdEl.innerHTML = '<tr>' + v.head.map(h => '<th>' + h + '</th>').join('') + '</tr>';
+  tblEl.style.minWidth = v.min + 'px';
+  rminEl.max = v.max; rmaxEl.max = v.max;
+  presetsEl.innerHTML = v.presets.map(([a, b]) =>
+      '<button type="button" class="chip rngbtn" data-r="' + a + '-' + b + '" aria-pressed="false">' + a + '–' + b + '</button>'
+    ).join('')
+    + '<button type="button" class="chip rngbtn" data-r="" aria-pressed="true">不限</button>';
+  buildRail();
+  clampRange();
+  syncRange();
+  syncRail();
+}
+
+/* 切换视图后把超出新榜上限的名次夹回区间内 */
+function clampRange(){
+  const max = VIEW[view].max;
+  [rminEl, rmaxEl].forEach(el => {
+    if (el.value === '') return;
+    const n = parseInt(el.value, 10);
+    el.value = isNaN(n) ? '' : Math.min(Math.max(n, 1), max);
+  });
+}
+
+function bingURL(cn, en){
+  return 'https://www.bing.com/search?q=' + encodeURIComponent(cn + ' ' + en);
+}
+
+function overallText(rk){
+  return rk === 0 ? '文理学院榜' : '综合 ' + rk;
+}
+
+/* 校名单元格：
+   · 综合排名 30 及以后 → 跳该校官网「研究生入学要求」页，带下划线 + ↗ 标记（表示这层信息）
+   · 综合排名前 30        → 跳该校官网首页，外观与纯文本完全一致（无下划线、无标记），只靠鼠标指针和悬停提示区分
+   · 其余（无链接数据）    → 纯文本 */
+function nameCell(d){
+  const cn = d[0], en = d[1], rk = d[4], req = d[10], site = SITE[cn];
+  let name;
+  if (req && rk >= 30){
+    name = '<a class="schlink" href="' + req + '" target="_blank" rel="noopener noreferrer"'
+      + ' title="打开 ' + cn + ' 官网的研究生入学要求">' + cn + '</a>';
+  } else if (site){
+    name = '<a class="schlink plain" href="' + site + '" target="_blank" rel="noopener noreferrer"'
+      + ' title="打开 ' + cn + ' 官网首页（' + site.replace(/^https:\/\//, '') + '）">' + cn + '</a>';
+  } else if (req){
+    name = '<a class="schlink" href="' + req + '" target="_blank" rel="noopener noreferrer"'
+      + ' title="打开 ' + cn + ' 官网的研究生入学要求">' + cn + '</a>';
+  } else {
+    name = '<span class="cn">' + cn + '</span>';
+  }
+  return '<td>' + name + '<span class="en">' + en + '</span></td>';
+}
+
+/* CS 视图第 5 列：综合排名 */
+function overallCell(d){
+  return '<span class="mini">' + overallText(d[4]) + '</span>';
+}
+
+/* 综合视图第 5 列：计算机排名（未进 CS 榜前 54 名显示 —） */
+function csCell(d){
+  const cn = d[0], cs = d[9];
+  if (!cs) return '<span class="csrk off" title="' + cn + '未进入 U.S. News 2026 本科 CS 榜前 54 名">—</span>';
+  return '<span class="csrk' + (cs <= 10 ? ' top' : '') + '" title="' + cn
+    + '：U.S. News 2026 本科计算机科学第 ' + cs + ' 名，综合第 ' + d[4] + ' 名">' + cs + '</span>';
+}
+
+/* 综合视图末列：对比 2025 */
+function trendCell(d){
+  const rk = d[4], prev = d[5];
+  if (!prev) return '<span class="flat">—</span>';
+  if (prev === rk) return '<span class="flat">持平</span>';
+  if (rk < prev) return '<span class="up">升 ' + (prev - rk) + '</span>';
+  return '<span class="down">降 ' + (rk - prev) + '</span>';
+}
+
+function visible(d){
+  const [cn, en, ab, t, rk, prev, city, lat, lon, cs] = d;
+  if (view === 'ov') return rk >= 1 && rk <= VIEW.ov.max;
+  return cs >= 1 && cs <= VIEW.cs.max;
+}
+
+function sortKey(d){ return view === 'cs' ? d[9] : d[4]; }
+
+function paint(){
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  const [rmin, rmax] = curRange();
+  const bad = (rmin !== null && rmax !== null && rmin > rmax);
+  rnoteEl.textContent = bad ? '起始名次不能大于结束名次' : (view === 'ov'
+    ? '按综合名次筛选 · 留空＝不限' : '按 CS 名次筛选 · 留空＝不限');
+  rnoteEl.classList.toggle('warn', bad);
+  const items = D.map((d, i) => ({d, i})).filter(({d}) => {
+    const [cn, en] = d;
+    if (!visible(d)) return false;
+    if ((mode === 'u' || mode === 'p' || mode === 'i') && d[3] !== mode) return false;
+    if (q && !(cn.toLowerCase().includes(q) || en.toLowerCase().includes(q))) return false;
+    if (bad) return false;
+    const k = sortKey(d);
+    if (rmin !== null && k < rmin) return false;
+    if (rmax !== null && k > rmax) return false;
+    return true;
+  }).sort((a, b) => sortKey(a.d) - sortKey(b.d));
+
+  let html = '';
+  items.forEach(({d, i}) => {
+    const [cn, en, ab, t, rk, prev, city, lat, lon, cs] = d;
+    const [cls, label] = TAG[t];
+    const first = view === 'cs' ? cs : rk;
+    const st = STATES[ab] ? STATES[ab][1] : ab;
+    html += '<tr>'
+      + '<td class="rk">' + first + '</td>'
+      + nameCell(d)
+      + '<td><button class="stlink" data-i="' + i + '" title="在地图上查看所在州">' + st + '</button></td>'
+      + '<td><span class="tag ' + cls + '">' + label + '</span></td>'
+      + (view === 'ov'
+          ? '<td>' + csCell(d) + '</td><td>' + trendCell(d) + '</td>'
+          : '<td>' + overallCell(d) + '</td>')
+      + '<td><a class="bing" href="' + bingURL(cn, en) + '" target="_blank" rel="noopener noreferrer" title="在 Bing 搜索 ' + cn + '">Bing ↗</a></td>'
+      + '</tr>';
+  });
+  rowsEl.innerHTML = html;
+  countEl.textContent = '共 ' + items.length + ' 所';
+  vcountEl.textContent = VIEW[view].label;
+}
+
+document.querySelectorAll('.segbtn').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.segbtn').forEach(x => x.setAttribute('aria-pressed', 'false'));
+  b.setAttribute('aria-pressed', 'true');
+  view = b.dataset.v;
+  renderShell();
+  paint();
+}));
+
+document.querySelectorAll('.chip:not(.rngbtn)').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.chip:not(.rngbtn)').forEach(x => x.setAttribute('aria-pressed', 'false'));
+  b.setAttribute('aria-pressed', 'true');
+  mode = b.dataset.k;
+  paint();
+}));
+document.getElementById('q').addEventListener('input', paint);
+
+/* 名次区间：输入框实时筛选；输入完成（change）时把数值夹到 1..当前榜上限 */
+[rminEl, rmaxEl].forEach(el => {
+  el.addEventListener('input', () => { syncRange(); syncRail(); paint(); });
+  el.addEventListener('change', () => {
+    if (el.value === '') { syncRange(); syncRail(); paint(); return; }
+    const n = parseInt(el.value, 10);
+    el.value = isNaN(n) ? '' : Math.min(Math.max(n, 1), VIEW[view].max);
+    syncRange(); syncRail(); paint();
+  });
+});
+/* 预设区间按钮随视图重建，用事件委托绑定 */
+presetsEl.addEventListener('click', e => {
+  const btn = e.target.closest('.rngbtn');
+  if (!btn) return;
+  const r = btn.dataset.r;
+  if (r === '') { rminEl.value = ''; rmaxEl.value = ''; }
+  else { const p = r.split('-'); rminEl.value = p[0]; rmaxEl.value = p[1]; }
+  syncRange(); syncRail();
+  paint();
+});
+/* 滑轨：拖动左/右手柄，按 10 名一档写回名次区间 */
+railLoEl.addEventListener('input', () => applyRail('lo'));
+railHiEl.addEventListener('input', () => applyRail('hi'));
+
+/* ---------- 地图浮层 ---------- */
+const OV = document.getElementById('ov');
+const MAPBOX = document.getElementById('mapbox');
+let TOPO = null;
+
+const TOPO_URLS = [
+  'us-atlas-states-10m.json',
+  'https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json'
+];
+
+function loadTopo(){
+  if (TOPO) return Promise.resolve(TOPO);
+  return TOPO_URLS.reduce(
+    (p, url) => p.catch(() => fetch(url).then(r => {
+      if (!r.ok) throw new Error('http ' + r.status);
+      return r.json();
+    })),
+    Promise.reject()
+  ).then(j => { TOPO = j; return j; });
+}
+
+function drawMap(i){
+  const d = D[i];
+  MAPBOX.innerHTML = '<p class="ovi">地图加载中…</p>';
+  loadTopo().then(topo => {
+    const feats = topojson.feature(topo, topo.objects.states).features;
+    const fips = STATES[d[2]] ? STATES[d[2]][0] : null;
+    const proj = d3.geoAlbersUsa().scale(1250).translate([480, 300]);
+    const path = d3.geoPath(proj);
+    let svg = '<svg viewBox="0 0 960 600" role="img" aria-label="美国地图，高亮显示' + d[0] + '所在的'
+      + (STATES[d[2]] ? STATES[d[2]][1] : d[2]) + '"><rect width="960" height="600" fill="#fbfbfa"/>';
+    feats.forEach(f => {
+      const on = String(f.id) === fips;
+      svg += '<path d="' + path(f) + '" fill="' + (on ? '#b5d4f4' : '#eceae4')
+        + '" stroke="' + (on ? '#185fa5' : '#ffffff') + '" stroke-width="' + (on ? 1.4 : 0.8) + '"/>';
+    });
+    const p = proj([d[8], d[7]]);
+    if (p) {
+      svg += '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1)
+        + '" r="9" fill="rgba(24,95,165,.20)"/>'
+        + '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1)
+        + '" r="4.5" fill="#185fa5" stroke="#ffffff" stroke-width="2"/>';
+    }
+    svg += '</svg>';
+    MAPBOX.innerHTML = svg;
+  }).catch(() => {
+    MAPBOX.innerHTML = '<p class="ovi">地图数据加载失败（需要联网获取美国州界数据），请检查网络后重试。</p>';
+  });
+}
+
+function openMap(i){
+  const d = D[i];
+  const st = STATES[d[2]] ? STATES[d[2]][1] : d[2];
+  document.getElementById('ovt').textContent = st + ' · ' + d[0];
+  document.getElementById('ovs').textContent = d[0] + ' ' + d[1] + ' · 所在城市：' + d[6]
+    + ' · U.S. News ' + overallText(d[4]) + (d[9] ? ' · CS 第 ' + d[9] + ' 名' : ' · 未入 CS 前 60');
+  OV.hidden = false;
+  drawMap(i);
+  document.getElementById('ovx').focus();
+}
+function closeMap(){ OV.hidden = true; MAPBOX.innerHTML = ''; }
+
+rowsEl.addEventListener('click', e => {
+  const b = e.target.closest('.stlink');
+  if (b) openMap(Number(b.dataset.i));
+});
+document.getElementById('ovx').addEventListener('click', closeMap);
+OV.addEventListener('click', e => { if (e.target === OV) closeMap(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !OV.hidden) closeMap(); });
+
+/* ---------- 回到顶部 ---------- */
+const TOP = document.getElementById('totop');
+const NO_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function syncTop(){ TOP.classList.toggle('on', window.scrollY > 320); }
+
+TOP.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: NO_MOTION ? 'auto' : 'smooth' });
+  TOP.blur();
+});
+window.addEventListener('scroll', syncTop, { passive: true });
+window.addEventListener('resize', syncTop, { passive: true });
+syncTop();
+
+renderShell();
+paint();
+</script>
+</body>
+</html>

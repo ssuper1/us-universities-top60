@@ -1,0 +1,16 @@
+# 临时 / 调试产物
+_*.html
+_dump_*.html
+_probe.html
+_render.txt
+*.log
+
+# 系统
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
