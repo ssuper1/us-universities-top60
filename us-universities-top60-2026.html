@@ -90,10 +90,11 @@
   table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:760px}
   th{position:sticky;top:0;background:var(--card);text-align:left;font-weight:500;font-size:12px;
     color:var(--t2);padding:8px 9px;border-bottom:.5px solid var(--line);white-space:nowrap;z-index:2}
+  th:first-child{text-align:center}
   td{padding:4px 9px;border-bottom:.5px solid var(--line);vertical-align:middle;line-height:1.32}
   tbody tr:last-child td{border-bottom:none}
   tbody tr:hover{background:#fafaf8}
-  .rk{font-weight:600;font-variant-numeric:tabular-nums}
+  .rk{font-weight:600;font-variant-numeric:tabular-nums;text-align:center}
   .cn{font-weight:500}
   .schlink{font-weight:500;color:var(--t1);text-decoration:none;cursor:pointer;
     border-bottom:1px solid rgba(24,95,165,.45)}
@@ -131,6 +132,8 @@
   .eng.off{color:var(--t3);cursor:default;border-bottom:0}
   .eng.off::after{display:none}
   .tbl-scroll{overflow:auto}
+  /* 学校列：无论窗口多窄都不折行，列宽按最长校名（英文名 209.8px）定死 236px */
+  .tbl-scroll tbody td:nth-child(2){white-space:nowrap}
   h2{font-size:16px;font-weight:600;margin:36px 0 10px}
   .notes{background:var(--card);border:.5px solid var(--line);border-radius:12px;padding:4px 22px 18px}
   .notes p{margin:14px 0;color:var(--t1)}
@@ -515,11 +518,11 @@ const ENG = {
 const VIEW = {
   ov: {label:'按 U.S. News 2026 全美综合大学排名（附 CS 排名）', max:60,
        head:['名次','学校','所在州','类型','CS','雅思/托福','对比 2025','搜索'],
-       w:['50px','','92px','56px','60px','104px','86px','74px'], min:920,
+       w:['50px','236px','158px','62px','64px','140px','124px','96px'], min:920,
        presets:[[1,10],[11,30],[31,60]]},
   cs: {label:'按 U.S. News 2026 最佳研究生计算机科学排名（前 50，覆盖到第 46 名）', max:46,
        head:['CS 名次','学校','所在州','类型','综合排名','雅思/托福','搜索'],
-       w:['50px','','92px','56px','86px','104px','74px'], min:860,
+       w:['50px','236px','158px','62px','146px','170px','108px'], min:920,
        presets:[[1,10],[11,30],[31,46]]}
 };
 let view = 'ov';
