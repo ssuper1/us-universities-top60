@@ -4,9 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>美国高校排名 Top 60</title>
-<meta http-equiv="refresh" content="0; url=us-universities-top60-2026.html">
+<script>
+/* GitHub Pages 给所有 HTML 固定发 Cache-Control: max-age=600（10 分钟），
+   这期间浏览器不回源校验、直接拿本地副本，所以跳固定文件名会看到旧版本。
+   下面在跳转时带一个时间戳参数，让每次访问都是「新 URL」，绕开缓存。
+   本文件自身即使命中缓存，这段脚本每次加载都会重新执行，时间戳总是新的。 */
+location.replace('us-universities-top60-2026.html?v=' + Date.now());
+</script>
+<noscript><meta http-equiv="refresh" content="0; url=us-universities-top60-2026.html"></noscript>
 <link rel="canonical" href="us-universities-top60-2026.html">
-<script>location.replace('us-universities-top60-2026.html');</script>
 <style>
   :root{ --bg:#f7f7f5; --fg:#1a1a19; --dim:#6b6b66; --line:#e3e3df; --accent:#0f6e56; }
   @media (prefers-color-scheme: dark){
@@ -39,8 +45,12 @@
     <h1>美国高校排名 Top 60</h1>
     <p>正在打开页面…</p>
     <p>如果浏览器没有自动跳转，请点这里：<br>
-      <a href="us-universities-top60-2026.html">us-universities-top60-2026.html</a>
+      <a id="go" href="us-universities-top60-2026.html">us-universities-top60-2026.html</a>
     </p>
   </div>
+<script>
+  var go = document.getElementById('go');
+  if (go) go.href = 'us-universities-top60-2026.html?v=' + Date.now();
+</script>
 </body>
 </html>
