@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 地图用的 d3 / topojson 已改为「点开地图时才加载」，这里只预先解析域名，不占带宽、不阻塞渲染 -->
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <title>美国高校排名 Top 60 · 2026 U.S. News 全美综合大学 / 计算机专业</title>
 <style>
   :root{
@@ -93,7 +96,8 @@
   th:first-child{text-align:center}
   td{padding:4px 9px;border-bottom:.5px solid var(--line);vertical-align:middle;line-height:1.32}
   tbody tr:last-child td{border-bottom:none}
-  tbody tr:hover{background:#fafaf8}
+  /* 悬停态只给真正的指针设备：触屏上 :hover 会「粘住」不散，每次都触发多余重绘 */
+  @media (hover:hover) and (pointer:fine){tbody tr:hover{background:#fafaf8}}
   .rk{font-weight:600;font-variant-numeric:tabular-nums;text-align:center}
   .cn{font-weight:500}
   .schlink{font-weight:500;color:var(--t1);text-decoration:none;cursor:pointer;
@@ -131,7 +135,9 @@
   .eng .new{color:var(--t3);font-size:11.5px;margin-left:1px}
   .eng.off{color:var(--t3);cursor:default;border-bottom:0}
   .eng.off::after{display:none}
-  .tbl-scroll{overflow:auto}
+  /* overscroll-behavior-x：表格横滑到底时不要顺带把整页左右晃
+     （手机端横向链式回弹会让人误以为页面在抖） */
+  .tbl-scroll{overflow:auto;overscroll-behavior-x:contain}
   /* 学校列：无论窗口多窄都不折行，列宽按最长校名（英文名 209.8px）定死 236px */
   .tbl-scroll tbody td:nth-child(2){white-space:nowrap}
   h2{font-size:16px;font-weight:600;margin:36px 0 10px}
@@ -189,6 +195,30 @@
   .cardstoggle .ctn{font-size:11px;color:var(--t3);background:var(--gray-bg);border-radius:20px;padding:1px 7px}
   .cards[hidden]{display:none}
   @media (prefers-reduced-motion: reduce){ .cardstoggle .ctar{transition:none} }
+  /* 底部长篇说明（使用详解 / 数据核验记录 / 两张榜怎么读 / 其他榜单）：
+     正文放在 <template> 里，默认完全不参与布局与绘制，点按钮才第一次注入 DOM。
+     这是手机端首屏最大的一笔开销——折叠前这部分占了整页高度的约六成、字数约六成半。 */
+  .ddtoggle{display:flex;width:100%;align-items:center;gap:9px;margin:16px 0 0;padding:11px 15px;
+    background:var(--card);border:.5px solid var(--line);border-radius:12px;cursor:pointer;
+    font-size:13.5px;font-weight:500;line-height:1.4;color:var(--t2);text-align:left;
+    transition:color .15s,border-color .15s}
+  .ddtoggle:hover{color:var(--blue-tx);border-color:var(--blue-tx)}
+  .ddtoggle:focus-visible{outline:2px solid var(--blue-tx);outline-offset:2px}
+  .ddtoggle .ddar{display:inline-block;flex:none;font-size:11px;color:var(--t3);transition:transform .18s}
+  .ddtoggle.on .ddar{transform:rotate(90deg)}
+  .ddtoggle .ddtx{flex:none}
+  .ddtoggle .ddmeta{margin-left:auto;font-size:11.5px;font-weight:400;color:var(--t3);
+    font-variant-numeric:tabular-nums;text-align:right}
+  .ddbody{margin:0}
+  .ddbody[hidden]{display:none}
+  .ddbody > h2:first-child{margin-top:24px}
+  @media (prefers-reduced-motion: reduce){ .ddtoggle .ddar{transition:none} }
+  /* 窄屏：标签与字数说明分两行。这段必须排在基础规则之后——
+     同优先级就只比先后，写在前面会被上面的 .ddtoggle .ddmeta{margin-left:auto} 盖掉。 */
+  @media (max-width:640px){
+    .ddtoggle{flex-wrap:wrap;gap:2px 9px;padding:10px 13px}
+    .ddtoggle .ddmeta{margin-left:0;flex-basis:100%;padding-left:20px;text-align:left}
+  }
 </style>
 </head>
 <body>
@@ -278,7 +308,17 @@
       </table>
     </div>
   </div>
-  <p class="hint" style="margin:10px 2px 0">综合排名视图里已附<strong>「CS」列</strong>（U.S. News 2026 研究生 CS 榜名次，显示「—」表示未进前 50 名，鼠标悬停可看两个榜的落差），切到「计算机专业排名」则整套表换成 CS 榜、第 5 列反过来显示综合名次，两榜可互相对照；官方研究生 CS 榜只公开到第 46 名，按并列结构即 50 所。上方<strong>「名次区间」</strong>可按当前榜的名次筛选：直接填起止数字、点 1–10 / 11–30 / 31–60 预设，或拖动<strong>「名次滑轨」</strong>的两个手柄（左＝起点、右＝终点，每 10 名吸附一档；<strong>在轨道上单击或按住拖动</strong>也能直接跳到该档位）——三种操作共用同一组数值，两边留空即不限（综合视图按综合名次、CS 视图按 CS 名次）。点击「所在州」弹出美国地图定位；点击「Bing」在新标签页搜索该校。<strong>校名本身也可点</strong>，按名次分两种：<strong>综合排名前 20</strong> 的学校跳转<strong>该校官网首页</strong>（外观与纯文本完全相同，<strong>不带下划线</strong>，靠鼠标指针和悬停提示区分——悬停会显示目标网址）；<strong>综合排名第 20 名及以后</strong>的学校跳转<strong>该校官网的研究生入学要求页</strong>（<strong>带下划线 + ↗ 标记</strong>，内容是 GPA、学历、语言成绩等硬门槛，与前者用下划线明确区分）。</p>
+  <p class="hint" style="margin:10px 2px 0">上方可按<strong>当前榜的名次</strong>筛选：直接填起止数字、点 1–10 / 11–30 / 31–60 预设，或拖动<strong>「名次滑轨」</strong>的两个手柄（每 10 名一档；两边留空＝不限）。点「所在州」在地图上定位，点「Bing」开新标签页搜索，点<strong>校名</strong>跳官网——<strong>综合排名第 20 名之前</strong>跳官网首页（外观与正文一样、不带下划线），<strong>第 20 名及以后</strong>跳该校研究生入学要求页（带下划线 + ↗ 标记）；点「雅思/托福」那一格里的分数，跳到该校官网原文。</p>
+
+  <button class="ddtoggle" id="ddtoggle" type="button" aria-expanded="false" aria-controls="ddbody">
+    <span class="ddar" aria-hidden="true">▸</span>
+    <span class="ddtx">展开完整说明与榜单解读</span>
+    <span class="ddmeta">约 6,100 字 · 使用详解 / 数据核验记录 / 两张榜怎么读 / 其他榜单</span>
+  </button>
+  <div class="ddbody" id="ddbody" hidden></div>
+  <!-- 下面这整段是「点开才加载」的长文：放在 template 里不会参与首次布局与绘制 -->
+  <template id="ddtpl">
+  <p class="hint" style="margin:0 2px 12px">综合排名视图里已附<strong>「CS」列</strong>（U.S. News 2026 研究生 CS 榜名次，显示「—」表示未进前 50 名，鼠标悬停可看两个榜的落差），切到「计算机专业排名」则整套表换成 CS 榜、第 5 列反过来显示综合名次，两榜可互相对照；官方研究生 CS 榜只公开到第 46 名，按并列结构即 50 所。上方<strong>「名次区间」</strong>可按当前榜的名次筛选：直接填起止数字、点 1–10 / 11–30 / 31–60 预设，或拖动<strong>「名次滑轨」</strong>的两个手柄（左＝起点、右＝终点，每 10 名吸附一档；<strong>在轨道上单击或按住拖动</strong>也能直接跳到该档位）——三种操作共用同一组数值，两边留空即不限（综合视图按综合名次、CS 视图按 CS 名次）。点击「所在州」弹出美国地图定位；点击「Bing」在新标签页搜索该校。<strong>校名本身也可点</strong>，按名次分两种：<strong>第 20 名之前</strong>的学校跳转<strong>该校官网首页</strong>（外观与纯文本完全相同，<strong>不带下划线</strong>，靠鼠标指针和悬停提示区分——悬停会显示目标网址）；<strong>第 20 名及以后</strong>的学校跳转<strong>该校官网的研究生入学要求页</strong>（<strong>带下划线 + ↗ 标记</strong>，内容是 GPA、学历、语言成绩等硬门槛，与前者用下划线明确区分）。</p>
 
   <div class="notes" style="margin:14px 0 0">
     <p><strong>关于「研究生入学要求」链接</strong>：这批链接是我在 2026-09-12 逐校打开官网核对过的，优先指向官方写明「最低入学要求 / Minimum Requirements」的那一页，而不是笼统的招生首页。<strong>本轮（9-12 晚）又整体复检了一遍</strong>：原有 45 条链接逐条请求验证——41 条直接返回正常页面；UC 戴维斯、UC 默塞德、明尼苏达三校官网对自动请求返回 403，改用浏览器方式打开确认页面正常；乔治华盛顿大学（graduate.admissions.gwu.edu）整站被 Cloudflare 拦截，脚本和浏览器都进不去，只能确认域名有效、无法验证页面内容，点击前请留意。另有 15 条链接本轮换成了更贴题的一页（下表）。几点使用提示：</p>
@@ -288,7 +328,7 @@
       <li><strong>最低 GPA 常见写法是 3.0 / 4.0</strong>（UW、UT Austin、UF、UMD、Minnesota 均是），少数校写 2.75（理海）；另有不少校按「最后 60 学分 / 高年级课程」单独计算 GPA，比四年总 GPA 更容易达标——这对大三才发力的人有利。</li>
       <li><strong>语言线各校不同</strong>：常见是托福 80–90 / 雅思 6.5–7.0，个别项目更高。表中<strong>「雅思/托福」列</strong>是各校研究生院的最低线，<strong>只照抄官网印出来的那一套，不替学校补历史分值</strong>：新旧两套并列的写「雅思/旧制(新制)」，如 <em>6.5/80(4.5)</em>；官网只挂新 6 分制的直接写 <em>7.0/4.5</em>（如 UC 戴维斯、UF、维拉诺瓦、圣塔克拉拉）；只挂旧制的写 <em>6.5/81</em>（如乔治华盛顿、UC 默塞德）；罗格斯官网按单项给分、没有总分，写成 <em>7.0/22+23+21+17</em>（写作/口语/阅读/听力）。<strong>点分数跳到该校官网原文</strong>，鼠标悬停会说明该校公布的是哪一套。本列覆盖综合排名 20–59 的 43 所，全部于 2026-09-13 逐校核对官网原文；其中卡内基梅隆、埃默里官网写明语言要求<strong>由各系自定</strong>，威廉与玛丽未公布统一最低线，这三所显示文字而不是分数。</li>
       <li><strong>ETS 从 2026-01-21 起换了托福计分方式</strong>：旧制 0–120 分，新制总分 0–6 分；2026 年 1 月 21 日及以后参加的考试按新制（旧分制 2028 年 1 月才正式退场）。大多数学校如今在官网上新旧并列（上表括号内的就是新制），少数学校只挂了一整套——只挂新制的有 UC 戴维斯、UF、维拉诺瓦、圣塔克拉拉，只挂旧制的有 UC 默塞德、乔治华盛顿。<strong>「只挂一套」不等于另一套不被接受，而是官网还没更新；本列按官网现状照抄，不替你换算或补值。申请前务必按自己的考试日期对照官网原文。</strong></li>
-      <li><strong>校名没有链接的两种情况</strong>：一种是综合排名前 20（本次按你的要求做到第 20 名）；另一种是官网没有集中写「研究生最低要求」的独立页面（例如圣塔克拉拉是各学院分别招生，这里给的是官方研究生项目总入口）。</li>
+      <li><strong>校名没有链接的两种情况</strong>：一种是综合排名第 20 名之前（本次按你的要求做到第 20 名）；另一种是官网没有集中写「研究生最低要求」的独立页面（例如圣塔克拉拉是各学院分别招生，这里给的是官方研究生项目总入口）。</li>
       <li><strong>页面会变</strong>：招生要求每年更新，申请前请以官网当年页面为准；若链接失效，用「Bing」列搜该校即可。</li>
     </ul>
   </div>
@@ -336,6 +376,7 @@
     校名链接为各校官网的研究生入学要求 / 申请要求页面，采集并逐一核验于 2026-09-12，2026-09-13 扩充到综合排名第 20 名及以后（共 49 所，含只在 CS 榜出现的学校）。研究生 CS 榜第 46 名共 5 校（BU、NC State、犹他、Vanderbilt、WUSTL）全部配链接。入学要求以官网当年页面为准。<br>
     本文件生成于 2026-09-12（当日由本科榜切换为研究生榜）。
   </footer>
+  </template>
 </div>
 
 <button id="totop" type="button" aria-label="回到顶部" title="回到顶部">
@@ -361,8 +402,6 @@
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script>
 const STATES = {
   AL:['01','亚拉巴马州'], AK:['02','阿拉斯加州'], AZ:['04','亚利桑那州'], AR:['05','阿肯色州'],
@@ -893,6 +932,31 @@ const TOPO_URLS = [
   'https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json'
 ];
 
+/* d3 与 topojson 原先写在 <body> 末尾用 <script src> 同步加载，共约 82KB。
+   同步脚本会一直阻塞到下载完才继续解析它后面的表格，手机弱网下实测 DOMContentLoaded
+   被拖到 3.2 秒（去掉后 0.24 秒）——也就是「页面打开像卡住」。
+   现在改成点开地图时才注入，首屏只留一次 DNS 预解析。 */
+const MAP_LIBS = [
+  'https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js'
+];
+const _libCache = {};
+function loadScriptOnce(src){
+  if (_libCache[src]) return _libCache[src];
+  _libCache[src] = new Promise((res, rej) => {
+    const el = document.createElement('script');
+    el.src = src; el.async = true;
+    el.onload = () => res();
+    el.onerror = () => rej(new Error('脚本加载失败 ' + src));
+    document.head.appendChild(el);
+  });
+  return _libCache[src];
+}
+function ensureMapLibs(){
+  if (window.d3 && window.topojson) return Promise.resolve();
+  return Promise.all(MAP_LIBS.map(loadScriptOnce));
+}
+
 function loadTopo(){
   if (TOPO) return Promise.resolve(TOPO);
   return TOPO_URLS.reduce(
@@ -907,7 +971,7 @@ function loadTopo(){
 function drawMap(i){
   const d = D[i];
   MAPBOX.innerHTML = '<p class="ovi">地图加载中…</p>';
-  loadTopo().then(topo => {
+  ensureMapLibs().then(loadTopo).then(topo => {
     const feats = topojson.feature(topo, topo.objects.states).features;
     const fips = STATES[d[2]] ? STATES[d[2]][0] : null;
     const proj = d3.geoAlbersUsa().scale(1250).translate([480, 300]);
@@ -928,8 +992,9 @@ function drawMap(i){
     }
     svg += '</svg>';
     MAPBOX.innerHTML = svg;
-  }).catch(() => {
-    MAPBOX.innerHTML = '<p class="ovi">地图数据加载失败（需要联网获取美国州界数据），请检查网络后重试。</p>';
+  }).catch(err => {
+    MAPBOX.innerHTML = '<p class="ovi">地图没能加载出来（需要联网取一次绘图库和美国州界数据），请检查网络后重试。</p>';
+    if (window.console) console.warn('[map]', err);
   });
 }
 
@@ -957,14 +1022,26 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && !OV.hidden
 const TOP = document.getElementById('totop');
 const NO_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-function syncTop(){ TOP.classList.toggle('on', window.scrollY > 320); }
+/* 只在「显示/隐藏」真的翻转时才动 DOM：滚动中每帧无脑 toggle 会让浏览器反复重算样式 */
+let topOn = false;
+function syncTop(){
+  const on = window.scrollY > 320;
+  if (on === topOn) return;
+  topOn = on;
+  TOP.classList.toggle('on', on);
+}
+let topRaf = 0;
+function onScroll(){
+  if (topRaf) return;                                  // 一帧最多算一次
+  topRaf = requestAnimationFrame(() => { topRaf = 0; syncTop(); });
+}
 
 TOP.addEventListener('click', () => {
   window.scrollTo({ top: 0, behavior: NO_MOTION ? 'auto' : 'smooth' });
   TOP.blur();
 });
-window.addEventListener('scroll', syncTop, { passive: true });
-window.addEventListener('resize', syncTop, { passive: true });
+window.addEventListener('scroll', onScroll, { passive: true });
+window.addEventListener('resize', onScroll, { passive: true });
 syncTop();
 
 /* ---------- 榜单亮点速览：默认收起，点标题展开 ---------- */
@@ -975,6 +1052,30 @@ if (CT && CD){
     CD.hidden = !open;
     CT.setAttribute('aria-expanded', String(open));
     CT.classList.toggle('on', open);
+  });
+}
+
+/* ---------- 底部长篇说明：首次点击才建 DOM，之后复用 ---------- */
+const DD  = document.getElementById('ddtoggle'),
+      DDB = document.getElementById('ddbody'),
+      DDT = document.getElementById('ddtpl');
+if (DD && DDB && DDT){
+  const TX = DD.querySelector('.ddtx'), ME = DD.querySelector('.ddmeta');
+  const MTX = TX ? TX.textContent : '', MME = ME ? ME.textContent : '';
+  let ddBuilt = false;
+  DD.addEventListener('click', () => {
+    const opening = DDB.hidden;
+    if (opening && !ddBuilt){                 // 真正把 template 内容搬进文档
+      DDB.appendChild(DDT.content.cloneNode(true));
+      ddBuilt = true;
+    }
+    DDB.hidden = !opening;                    // 收起只隐藏、不销毁，再展开是瞬时的
+    DD.classList.toggle('on', opening);
+    DD.setAttribute('aria-expanded', String(opening));
+    if (TX) TX.textContent = opening ? '收起完整说明与榜单解读' : MTX;
+    if (ME) ME.textContent = opening ? '点标题即可收起' : MME;
+    if (!opening && DD.getBoundingClientRect().top < 0)
+      DD.scrollIntoView({ block: 'start', behavior: NO_MOTION ? 'auto' : 'smooth' });
   });
 }
 
