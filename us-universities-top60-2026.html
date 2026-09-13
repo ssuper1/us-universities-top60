@@ -89,8 +89,8 @@
   .count{margin-left:auto;font-size:12px;color:var(--t3)}
   table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:760px}
   th{position:sticky;top:0;background:var(--card);text-align:left;font-weight:500;font-size:12px;
-    color:var(--t2);padding:10px 16px;border-bottom:.5px solid var(--line);white-space:nowrap;z-index:2}
-  td{padding:9px 16px;border-bottom:.5px solid var(--line);vertical-align:middle}
+    color:var(--t2);padding:8px 9px;border-bottom:.5px solid var(--line);white-space:nowrap;z-index:2}
+  td{padding:4px 9px;border-bottom:.5px solid var(--line);vertical-align:middle;line-height:1.32}
   tbody tr:last-child td{border-bottom:none}
   tbody tr:hover{background:#fafaf8}
   .rk{font-weight:600;font-variant-numeric:tabular-nums}
@@ -103,7 +103,7 @@
   /* 综合排名前 30：可点、跳官网首页，但外观与纯文本完全一致（无下划线、无 ↗ 标记），以此与 30 名以后的入学要求链接区分 */
   .schlink.plain,.schlink.plain:hover{color:var(--t1);border-bottom:0}
   .schlink.plain::after{display:none}
-  .en{display:block;font-size:11.5px;color:var(--t3);margin-top:1px}
+  .en{display:block;font-size:11px;color:var(--t3);margin-top:0;line-height:1.25}
   .stlink{font:inherit;font-size:13.5px;color:var(--t2);background:none;border:0;padding:0;cursor:pointer;
     border-bottom:.5px dashed rgba(0,0,0,.3);white-space:nowrap}
   .stlink:hover{color:var(--blue-tx);border-bottom-color:var(--blue-tx)}
@@ -121,6 +121,15 @@
   .csrk{font-variant-numeric:tabular-nums;cursor:help}
   .csrk.top{font-weight:600;color:var(--blue-tx)}
   .csrk.off{color:var(--t3)}
+  /* 英语要求列：雅思 / 托福（括号内为 2026-01-21 起 ETS 新 6 分制托福分） */
+  .eng{color:var(--blue-tx);text-decoration:none;white-space:nowrap;cursor:pointer;
+    font-variant-numeric:tabular-nums;border-bottom:1px solid rgba(24,95,165,.35)}
+  .eng:hover{border-bottom-color:var(--blue-tx)}
+  .eng::after{content:"↗";font-size:10px;margin-left:2px;vertical-align:1px;opacity:.5}
+  .eng:hover::after{opacity:1}
+  .eng .new{color:var(--t3);font-size:11.5px;margin-left:1px}
+  .eng.off{color:var(--t3);cursor:default;border-bottom:0}
+  .eng.off::after{display:none}
   .tbl-scroll{overflow:auto}
   h2{font-size:16px;font-weight:600;margin:36px 0 10px}
   .notes{background:var(--card);border:.5px solid var(--line);border-radius:12px;padding:4px 22px 18px}
@@ -161,7 +170,7 @@
   @media (prefers-reduced-motion:reduce){#totop{transition:none}}
   @media (max-width:640px){
     .wrap{padding:24px 14px 48px}
-    th,td{padding:8px 10px}
+    th,td{padding:4px 7px}
     input[type=search]{width:100%}
     .count{display:none}
     #totop{right:10px;bottom:12px;width:32px;height:32px}
@@ -175,7 +184,7 @@
     <h1>美国高校排名 Top 60</h1>
     <span class="trust" title="名次由公开榜单整理并经多源交叉核对得出，并非从 U.S. News 官网直接采集。综合榜官方表格页只公开前 10 名，研究生 CS 榜同样只公开前 10 名，因此第 40–60 名区间、以及研究生 CS 榜第 34 / 38 / 43 / 46 名这几档更依赖二手来源互相印证，可能存在个别偏差。用作申请决策前请以 U.S. News 官网原榜为准。">⚠ <b>数据可信度有限</b>：由公开榜单整理 + 多源交叉核对而来，<b>非官方直采</b>，个别名次可能有偏差 · 请以 U.S. News 官网为准</span>
   </div>
-  <p class="meta">U.S. News 2026 全美最佳综合大学排名（前 60，因大量并列实际覆盖到第 59 名、共 63 所，表中已附「计算机排名」列） + 2026 最佳研究生计算机科学排名（前 50，并列结构下覆盖到第 46 名、共 50 所） · 综合榜发布于 2025 年 9 月、研究生 CS 榜发布于 2026 年 4 月 · 综合 2027 版预计 2026 年 9 月 22 日上线</p>
+  <p class="meta">U.S. News 2026 全美最佳综合大学排名（前 60，因大量并列实际覆盖到第 59 名、共 63 所，表中已附「CS」列） + 2026 最佳研究生计算机科学排名（前 50，并列结构下覆盖到第 46 名、共 50 所） · 综合榜发布于 2025 年 9 月、研究生 CS 榜发布于 2026 年 4 月 · 综合 2027 版预计 2026 年 9 月 22 日上线</p>
 
   <div class="cards">
     <div class="card">
@@ -252,7 +261,7 @@
       </table>
     </div>
   </div>
-  <p class="hint" style="margin:10px 2px 0">综合排名视图里已附<strong>「计算机排名」列</strong>（U.S. News 2026 研究生 CS 榜名次，显示「—」表示未进前 50 名，鼠标悬停可看两个榜的落差），切到「计算机专业排名」则整套表换成 CS 榜、第 5 列反过来显示综合名次，两榜可互相对照；官方研究生 CS 榜只公开到第 46 名，按并列结构即 50 所。上方<strong>「名次区间」</strong>可按当前榜的名次筛选：直接填起止数字、点 1–10 / 11–30 / 31–60 预设，或拖动<strong>「名次滑轨」</strong>的两个手柄（左＝起点、右＝终点，每 10 名吸附一档；<strong>在轨道上单击或按住拖动</strong>也能直接跳到该档位）——三种操作共用同一组数值，两边留空即不限（综合视图按综合名次、CS 视图按 CS 名次）。点击「所在州」弹出美国地图定位；点击「Bing」在新标签页搜索该校。<strong>校名本身也可点</strong>，按名次分两种：<strong>综合排名前 30</strong> 的学校跳转<strong>该校官网首页</strong>（外观与纯文本完全相同，<strong>不带下划线</strong>，靠鼠标指针和悬停提示区分——悬停会显示目标网址）；<strong>综合排名第 30 名及以后</strong>的学校跳转<strong>该校官网的研究生入学要求页</strong>（<strong>带下划线 + ↗ 标记</strong>，内容是 GPA、学历、语言成绩等硬门槛，与前者用下划线明确区分）。</p>
+  <p class="hint" style="margin:10px 2px 0">综合排名视图里已附<strong>「CS」列</strong>（U.S. News 2026 研究生 CS 榜名次，显示「—」表示未进前 50 名，鼠标悬停可看两个榜的落差），切到「计算机专业排名」则整套表换成 CS 榜、第 5 列反过来显示综合名次，两榜可互相对照；官方研究生 CS 榜只公开到第 46 名，按并列结构即 50 所。上方<strong>「名次区间」</strong>可按当前榜的名次筛选：直接填起止数字、点 1–10 / 11–30 / 31–60 预设，或拖动<strong>「名次滑轨」</strong>的两个手柄（左＝起点、右＝终点，每 10 名吸附一档；<strong>在轨道上单击或按住拖动</strong>也能直接跳到该档位）——三种操作共用同一组数值，两边留空即不限（综合视图按综合名次、CS 视图按 CS 名次）。点击「所在州」弹出美国地图定位；点击「Bing」在新标签页搜索该校。<strong>校名本身也可点</strong>，按名次分两种：<strong>综合排名前 30</strong> 的学校跳转<strong>该校官网首页</strong>（外观与纯文本完全相同，<strong>不带下划线</strong>，靠鼠标指针和悬停提示区分——悬停会显示目标网址）；<strong>综合排名第 30 名及以后</strong>的学校跳转<strong>该校官网的研究生入学要求页</strong>（<strong>带下划线 + ↗ 标记</strong>，内容是 GPA、学历、语言成绩等硬门槛，与前者用下划线明确区分）。</p>
 
   <div class="notes" style="margin:14px 0 0">
     <p><strong>关于「研究生入学要求」链接</strong>：这批链接是我在 2026-09-12 逐校打开官网核对过的，优先指向官方写明「最低入学要求 / Minimum Requirements」的那一页，而不是笼统的招生首页。<strong>本轮（9-12 晚）又整体复检了一遍</strong>：原有 45 条链接逐条请求验证——41 条直接返回正常页面；UC 戴维斯、UC 默塞德、明尼苏达三校官网对自动请求返回 403，改用浏览器方式打开确认页面正常；乔治华盛顿大学（graduate.admissions.gwu.edu）整站被 Cloudflare 拦截，脚本和浏览器都进不去，只能确认域名有效、无法验证页面内容，点击前请留意。另有 15 条链接本轮换成了更贴题的一页（下表）。几点使用提示：</p>
@@ -260,7 +269,8 @@
       <li><strong>本轮改动的 15 条链接</strong>：UT 奥斯汀（→ /admissions/apply）、普渡（→ /admissions/how-to-apply/）、德州农工（→ 国际生研究生页）三条是用户提供的；其余 12 条由本次巡检替换——UC 戴维斯（→ /minimum-requirements，页面标题就是「Admissions Minimum Requirements」）、UCSB（→ 申请与录取清单）、罗格斯（→ /application-requirements）、佐治亚大学（→ /requirements/）、凯斯西储（→ /instructions-requirements）、弗吉尼亚理工（→ /how-to-apply.html）、维克森林（→ 截止日期与项目要求）、UC 默塞德（→ 学术与申请要求，写明最低 GPA 3.0）、宾州州立（→ /how-to-apply）、马萨诸塞大学安姆斯特（→ /apply/how-apply）、UC 河滨（→ /admission-requirements）、科罗拉多博尔德（→ 写明 Minimum Admissions Requirements）。</li>
       <li><strong>美国研究生院普遍是「双重门槛」</strong>：研究生院（Graduate School）定全校最低线，各系/项目再定更高的线。你在官网上看到的「最低要求」通常只是"够资格被受理"，实际录取线更高。比如 UF 全校最低 3.0，但很多系要求 3.5+。</li>
       <li><strong>最低 GPA 常见写法是 3.0 / 4.0</strong>（UW、UT Austin、UF、UMD、Minnesota 均是），少数校写 2.75（理海）；另有不少校按「最后 60 学分 / 高年级课程」单独计算 GPA，比四年总 GPA 更容易达标——这对大三才发力的人有利。</li>
-      <li><strong>语言线各校不同</strong>：常见是托福 80–90 / 雅思 6.5–7.0，个别项目更高。注意 UF 已公告 2027 春季起改用新的英语测评标准。</li>
+      <li><strong>语言线各校不同</strong>：常见是托福 80–90 / 雅思 6.5–7.0，个别项目更高。表中新增的<strong>「雅思/托福」列</strong>就是各校研究生院的最低线，写法为「雅思/旧制托福(新制托福)」——例如 <em>6.5/80(4.5)</em> 表示雅思 6.5、托福旧制 80、新制 4.5；若该校只公布新制就写成 <em>6.5/4.0</em>；未核实的显示「—」。<strong>点分数就能跳到该校官网原文</strong>（鼠标悬停可看到完整数值）。本列目前覆盖综合排名 30–59 的 33 所（威廉与玛丽官网未公布统一最低线，故为「—」）。</li>
+      <li><strong>ETS 从 2026-01-21 起换了托福计分方式</strong>：旧制 0–120 分，新制总分 0–6 分。2026 年 1 月 21 日及以后参加考试的按新制，之前的按旧制，大多数学校两套标准并行（上表括号内的就是新制）。少数学校只公布了其中一套（如 UC 默塞德目前只有旧制 80），另有极少数学校（如 UF）标注新标准要到 2027 春季才生效。<strong>申请前务必按自己的考试日期对照官网。</strong></li>
       <li><strong>校名没有链接的两种情况</strong>：一种是综合排名前 30（按你的要求本次只做 30 及以后）；另一种是官网没有集中写「研究生最低要求」的独立页面（例如圣塔克拉拉是各学院分别招生，这里给的是官方研究生项目总入口）。</li>
       <li><strong>页面会变</strong>：招生要求每年更新，申请前请以官网当年页面为准；若链接失效，用「Bing」列搜该校即可。</li>
     </ul>
@@ -461,14 +471,55 @@ const SITE = {
 };
 
 const TAG = {u:['u','公立'], i:['i','藤校'], p:['p','私立']};
+/* 研究生英语入学最低要求（只列雅思 / 托福）。
+   格式：雅思/旧制托福(新制托福)，如 '6.5/80(4.5)'；只有新制时直接写 雅思/新制，如 '6.5/4.0'。
+   括号内是 2026-01-21 起 ETS 启用的新 6 分制托福（总分）；旧制为 0–120 分制。
+   取值为研究生院（Graduate School）全校最低线，各系/项目可能更高。
+   2026-09-13 逐校官网核对；键为校名，值 = [分数文本, 详情页 URL]（URL 为空则回退到数据表里的入学要求链接）。 */
+const ENG = {
+  '佛罗里达大学': ['6.5/80(4.5)', 'https://www.admissions.ufl.edu/apply/graduate/international/'],
+  '德克萨斯大学奥斯汀分校': ['6.5/79(4.0)', 'https://graduate.utexas.edu/admissions/apply'],
+  '佐治亚理工学院': ['7.0/90(4.5)', 'https://grad.gatech.edu/admissions'],
+  '纽约大学': ['7.0/100(5.0)', 'https://www.nyu.edu/admissions/graduate-admissions/application-requirements.html'],
+  '加州大学戴维斯分校': ['7.0/80(4.5)', 'https://grad.ucdavis.edu/english-language-examinations'],
+  '加州大学尔湾分校': ['7.0/80(4.0)', 'https://grad.uci.edu/admissions/applying-to-uci/'],
+  '波士顿学院': ['7.0/100(5.0)', ''],
+  '塔夫茨大学': ['6.5/90(4.5)', 'https://asegrad.tufts.edu/applying/requirements/international-student-requirements'],
+  '伊利诺伊大学厄巴纳-香槟分校': ['6.5/79(4.0)', 'https://grad.illinois.edu/Admissions/instructions/04c'],
+  '威斯康星大学麦迪逊分校': ['7.0/92(5.0)', 'https://grad.wisc.edu/apply/requirements/'],
+  '加州大学圣塔芭芭拉分校': ['7.0/80(4.0)', 'https://www.graddiv.ucsb.edu/admissions/application-and-admission-checklist'],
+  '俄亥俄州立大学': ['6.5/79(4.0)', 'https://gpadmissions.osu.edu/grad/admissions.html'],
+  '波士顿大学': ['7.0/100(5.0)', 'https://www.bu.edu/grad/admission-funding/graduate-admission/'],
+  '罗格斯大学新布朗斯维克分校': ['7.0/83(4.5)', 'https://gradstudy.rutgers.edu/information/international-students'],
+  '马里兰大学帕克分校': ['7.0/96(5.0)', 'https://gradschool.umd.edu/admissions/admissions-requirements'],
+  '华盛顿大学': ['6.5/80(4.0)', 'https://grad.uw.edu/prospective-students/how-to-apply/requirements/'],
+  '理海大学': ['6.5/81(4.0)', 'https://www2.lehigh.edu/admissions/english-proficiency-requirement-for-graduate-studies'],
+  '东北大学': ['6.5/79(4.0)', 'https://graduate.northeastern.edu/admissions-aid/how-to-apply/'],
+  '普渡大学': ['6.5/80(4.0)', 'https://www.purdue.edu/academics/ogsps/admissions/how-to-apply/'],
+  '佐治亚大学': ['6.5/80(4.5)', 'https://grad.uga.edu/admissions/requirements/international-applications/english-language-proficiency-requirement/'],
+  '罗切斯特大学': ['7.0/100(5.0)', 'https://www.rochester.edu/college/gradstudies/admissions/'],
+  '凯斯西储大学': ['7.0/90(5.0)', 'https://case.edu/gradstudies/prospective-students/instructions-requirements'],
+  '佛罗里达州立大学': ['6.5/80(5.0)', 'https://gradschool.fsu.edu/admissions'],
+  '德州农工大学': ['6.0/80(4.5)', 'https://admissions.tamu.edu/apply/international/international-graduate.html'],
+  '弗吉尼亚理工学院': ['6.5/90(4.5)', 'https://graduateschool.vt.edu/admissions/how-to-apply.html'],
+  '维克森林大学': ['6.5/80(4.5)', 'https://graduate.wfu.edu/?p=393'],
+  '加州大学默塞德分校': ['6.5/80', 'https://graduatedivision.ucmerced.edu/node/35'],
+  '维拉诺瓦大学': ['6.5/80(4.0)', 'https://www.villanova.edu/university/liberal-arts-sciences/graduate-studies/applying-to-villanova/international.html'],
+  '乔治华盛顿大学': ['6.5/81(4.0)', 'https://graduate.admissions.gwu.edu/international-student-application-requirements'],
+  '宾夕法尼亚州立大学': ['6.5/80(4.5)', 'https://gradschool.psu.edu/graduate-admissions/how-to-apply/new-applicants/requirements-for-graduate-admission/'],
+  '圣塔克拉拉大学': ['6.5/90(4.5)', 'https://www.scu.edu/globalengagement/international-students/prospective-international-students/english-proficiency-requirement'],
+  '纽约州立大学石溪分校': ['6.5/80(4.5)', 'https://stonybrook.edu/commcms/grad/admissions/apply/graduate-programs.php'],
+  '明尼苏达大学双城分校': ['6.5/79(4.5)', 'https://grad.umn.edu/admissions/application-instructions'],
+};
+
 const VIEW = {
-  ov: {label:'按 U.S. News 2026 全美综合大学排名（附研究生计算机排名）', max:60,
-       head:['名次','学校','所在州','类型','计算机排名','对比 2025','搜索'],
-       w:['60px','','104px','64px','96px','92px','84px'], min:880,
+  ov: {label:'按 U.S. News 2026 全美综合大学排名（附 CS 排名）', max:60,
+       head:['名次','学校','所在州','类型','CS','雅思/托福','对比 2025','搜索'],
+       w:['50px','','92px','56px','60px','104px','86px','74px'], min:920,
        presets:[[1,10],[11,30],[31,60]]},
   cs: {label:'按 U.S. News 2026 最佳研究生计算机科学排名（前 50，覆盖到第 46 名）', max:46,
-       head:['CS 名次','学校','所在州','类型','综合排名','搜索'],
-       w:['60px','','104px','64px','96px','84px'], min:800,
+       head:['CS 名次','学校','所在州','类型','综合排名','雅思/托福','搜索'],
+       w:['50px','','92px','56px','86px','104px','74px'], min:860,
        presets:[[1,10],[11,30],[31,46]]}
 };
 let view = 'ov';
@@ -679,6 +730,21 @@ function csCell(d){
     + '：U.S. News 2026 研究生计算机科学第 ' + cs + ' 名，综合第 ' + d[4] + ' 名">' + cs + '</span>';
 }
 
+/* 英语要求列：雅思 / 托福最低分，括号内为 2026-01-21 起 ETS 新 6 分制托福总分。
+   整格可点，跳该校官网英语要求 / 研究生入学要求页；未核实的显示 — */
+function engCell(d){
+  const cn = d[0], e = ENG[cn];
+  if (!e) return '<span class="eng off" title="' + cn + '：尚未核实其研究生英语入学最低分">—</span>';
+  const sc = e[0], i = sc.indexOf('(');
+  const main = i < 0 ? sc : sc.slice(0, i);
+  const tail = i < 0 ? '' : '<span class="new">' + sc.slice(i) + '</span>';
+  const url = e[1] || d[10];
+  const tip = cn + ' 研究生英语最低要求：雅思 / 托福 ' + sc + '（点击查看官网详情）';
+  if (!url) return '<span class="eng off" title="' + tip + '">' + main + tail + '</span>';
+  return '<a class="eng" href="' + url + '" target="_blank" rel="noopener noreferrer" title="' + tip + '">'
+    + main + tail + '</a>';
+}
+
 /* 综合视图末列：对比 2025 */
 function trendCell(d){
   const rk = d[4], prev = d[5];
@@ -727,8 +793,8 @@ function paint(){
       + '<td><button class="stlink" data-i="' + i + '" title="在地图上查看所在州">' + st + '</button></td>'
       + '<td><span class="tag ' + cls + '">' + label + '</span></td>'
       + (view === 'ov'
-          ? '<td>' + csCell(d) + '</td><td>' + trendCell(d) + '</td>'
-          : '<td>' + overallCell(d) + '</td>')
+          ? '<td>' + csCell(d) + '</td><td>' + engCell(d) + '</td><td>' + trendCell(d) + '</td>'
+          : '<td>' + overallCell(d) + '</td><td>' + engCell(d) + '</td>')
       + '<td><a class="bing" href="' + bingURL(cn, en) + '" target="_blank" rel="noopener noreferrer" title="在 Bing 搜索 ' + cn + '">Bing ↗</a></td>'
       + '</tr>';
   });
