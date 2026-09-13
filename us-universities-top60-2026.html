@@ -56,11 +56,14 @@
   input[type=number]:focus{border-color:var(--blue-tx)}
   .rlabel{font-size:13px;color:var(--t2)}
   .rdash{color:var(--t3);font-size:13px;margin:0 -2px}
-  .presets{display:inline-flex;gap:6px;flex-wrap:wrap}
+  /* 快捷选：始终排成一行（.bar 本身会换行，窄屏时整组落到下一行，不会挤破面板） */
+  .presets{display:inline-flex;gap:6px;flex-wrap:nowrap;flex:0 0 auto}
   .rnote{margin-left:auto;font-size:12px;color:var(--t3)}
   .rnote.warn{color:var(--down)}
   .bar.rngbar{border-bottom:.5px solid var(--line);padding-top:10px;padding-bottom:8px}
-  .rngbox{flex:1 1 240px;min-width:160px}
+  /* 缩短滑轨：宽屏封顶 330px（够放 7 个刻度标签），窄屏自动收窄。
+     注意 basis 要用小值：换行是按 basis 算的，写 330px 会让「名次滑轨」这四个字被挤到单独一行。 */
+  .rngbox{flex:1 1 150px;min-width:150px;max-width:330px}
   .rngrailwrap{position:relative;height:24px}
   .rngline,.rngtrack{position:absolute;top:50%;left:8px;right:8px;height:4px;margin-top:-2px;
     border-radius:2px;cursor:pointer}
@@ -277,6 +280,10 @@
       <button class="chip" data-k="i" aria-pressed="false">只看常春藤</button>
       <span class="count" id="count">共 63 所</span>
     </div>
+    <!-- 「名次区间」这一行（起 / 止 手工输入框）暂时整段注释掉：起止名次现已由下面
+         「名次滑轨」的两个手柄给出，不再需要手打数字。注释保留，需要时整段放回来即可。
+         筛选用的 #rmin / #rmax 仍在，只是改成 hidden（不占版面、不可见），
+         所以下面这一整套区间逻辑（预设、滑轨换算、夹取）都不用改。
     <div class="bar plain">
       <span class="rlabel">名次区间</span>
       <input id="rmin" type="number" min="1" max="60" step="1" inputmode="numeric" placeholder="起" aria-label="起始名次">
@@ -285,8 +292,11 @@
       <span class="presets" id="presets"></span>
       <span class="rnote" id="rnote"></span>
     </div>
+    -->
     <div class="bar plain rngbar">
       <span class="rlabel">名次滑轨</span>
+      <input id="rmin" type="hidden" aria-hidden="true">
+      <input id="rmax" type="hidden" aria-hidden="true">
       <div class="rngbox">
         <div class="rngrailwrap">
           <div class="rngline"></div>
@@ -298,7 +308,11 @@
         </div>
         <div class="rngticks" id="rticks"></div>
       </div>
-      <span class="rngval" id="rval">不限</span>
+      <span class="presets" id="presets"></span>
+      <!-- 滑轨右侧原有的「不限 / 1–60」读数已去掉，让整行只留 滑轨 + 快捷选。
+           需要恢复时把下面这一行放回去即可（脚本里对 null 已经做了保护）。
+      <span class="rngval" id="rval"></span>
+      -->
     </div>
     <div class="tbl-scroll">
       <table>
@@ -308,7 +322,7 @@
       </table>
     </div>
   </div>
-  <p class="hint" style="margin:10px 2px 0">上方可按<strong>当前榜的名次</strong>筛选：直接填起止数字、点 1–10 / 11–30 / 31–60 预设，或拖动<strong>「名次滑轨」</strong>的两个手柄（每 10 名一档；两边留空＝不限）。点「所在州」在地图上定位，点「Bing」开新标签页搜索，点<strong>校名</strong>跳官网——<strong>综合排名第 20 名之前</strong>跳官网首页（外观与正文一样、不带下划线），<strong>第 20 名及以后</strong>跳该校研究生入学要求页（带下划线 + ↗ 标记）；点「雅思/托福」那一格里的分数，跳到该校官网原文。</p>
+  <p class="hint" style="margin:10px 2px 0">上方可按<strong>当前榜的名次</strong>筛选：拖动<strong>「名次滑轨」</strong>的两个手柄（每 10 名吸附一档；两边留空＝不限），或点它右边的 1–10 / 11–30 / 31–60 快捷区间。点「所在州」在地图上定位，点「Bing」开新标签页搜索，点<strong>校名</strong>跳官网——<strong>综合排名第 20 名之前</strong>跳官网首页（外观与正文一样、不带下划线），<strong>第 20 名及以后</strong>跳该校研究生入学要求页（带下划线 + ↗ 标记）；点「雅思/托福」那一格里的分数，跳到该校官网原文。</p>
 
   <button class="ddtoggle" id="ddtoggle" type="button" aria-expanded="false" aria-controls="ddbody">
     <span class="ddar" aria-hidden="true">▸</span>
@@ -318,7 +332,7 @@
   <div class="ddbody" id="ddbody" hidden></div>
   <!-- 下面这整段是「点开才加载」的长文：放在 template 里不会参与首次布局与绘制 -->
   <template id="ddtpl">
-  <p class="hint" style="margin:0 2px 12px">综合排名视图里已附<strong>「CS」列</strong>（U.S. News 2026 研究生 CS 榜名次，显示「—」表示未进前 50 名，鼠标悬停可看两个榜的落差），切到「计算机专业排名」则整套表换成 CS 榜、第 5 列反过来显示综合名次，两榜可互相对照；官方研究生 CS 榜只公开到第 46 名，按并列结构即 50 所。上方<strong>「名次区间」</strong>可按当前榜的名次筛选：直接填起止数字、点 1–10 / 11–30 / 31–60 预设，或拖动<strong>「名次滑轨」</strong>的两个手柄（左＝起点、右＝终点，每 10 名吸附一档；<strong>在轨道上单击或按住拖动</strong>也能直接跳到该档位）——三种操作共用同一组数值，两边留空即不限（综合视图按综合名次、CS 视图按 CS 名次）。点击「所在州」弹出美国地图定位；点击「Bing」在新标签页搜索该校。<strong>校名本身也可点</strong>，按名次分两种：<strong>第 20 名之前</strong>的学校跳转<strong>该校官网首页</strong>（外观与纯文本完全相同，<strong>不带下划线</strong>，靠鼠标指针和悬停提示区分——悬停会显示目标网址）；<strong>第 20 名及以后</strong>的学校跳转<strong>该校官网的研究生入学要求页</strong>（<strong>带下划线 + ↗ 标记</strong>，内容是 GPA、学历、语言成绩等硬门槛，与前者用下划线明确区分）。</p>
+  <p class="hint" style="margin:0 2px 12px">综合排名视图里已附<strong>「CS」列</strong>（U.S. News 2026 研究生 CS 榜名次，显示「—」表示未进前 50 名，鼠标悬停可看两个榜的落差），切到「计算机专业排名」则整套表换成 CS 榜、第 5 列反过来显示综合名次，两榜可互相对照；官方研究生 CS 榜只公开到第 46 名，按并列结构即 50 所。上方<strong>「名次滑轨」</strong>可按当前榜的名次筛选：拖动两个手柄（左＝起点、右＝终点，每 10 名吸附一档；<strong>在轨道上单击或按住拖动</strong>也能直接跳到该档位），或点它右边的 1–10 / 11–30 / 31–60 快捷区间——两种操作共用同一组数值，两边留空即不限（综合视图按综合名次、CS 视图按 CS 名次）。点击「所在州」弹出美国地图定位；点击「Bing」在新标签页搜索该校。<strong>校名本身也可点</strong>，按名次分两种：<strong>第 20 名之前</strong>的学校跳转<strong>该校官网首页</strong>（外观与纯文本完全相同，<strong>不带下划线</strong>，靠鼠标指针和悬停提示区分——悬停会显示目标网址）；<strong>第 20 名及以后</strong>的学校跳转<strong>该校官网的研究生入学要求页</strong>（<strong>带下划线 + ↗ 标记</strong>，内容是 GPA、学历、语言成绩等硬门槛，与前者用下划线明确区分）。</p>
 
   <div class="notes" style="margin:14px 0 0">
     <p><strong>关于「研究生入学要求」链接</strong>：这批链接是我在 2026-09-12 逐校打开官网核对过的，优先指向官方写明「最低入学要求 / Minimum Requirements」的那一页，而不是笼统的招生首页。<strong>本轮（9-12 晚）又整体复检了一遍</strong>：原有 45 条链接逐条请求验证——41 条直接返回正常页面；UC 戴维斯、UC 默塞德、明尼苏达三校官网对自动请求返回 403，改用浏览器方式打开确认页面正常；乔治华盛顿大学（graduate.admissions.gwu.edu）整站被 Cloudflare 拦截，脚本和浏览器都进不去，只能确认域名有效、无法验证页面内容，点击前请留意。另有 15 条链接本轮换成了更贴题的一页（下表）。几点使用提示：</p>
@@ -676,12 +690,15 @@ function syncRail(){
   const lo = i / blocks * 100, hi = j / blocks * 100;
   railFillEl.style.left = lo + '%';
   railFillEl.style.width = (hi - lo) + '%';
-  const onGrid = startAt(i) === s && endAt(j) === e;
-  rvalEl.textContent = (a === null && b === null) ? '不限'
-    : (a === null ? '1–' + e : (b === null ? s + '–' + max : s + '–' + e));
-  rvalEl.classList.toggle('approx', !onGrid);
-  rvalEl.title = onGrid ? '' :
-    '滑轨停在最近的每 10 名档位，实际按上方填写的 ' + s + '–' + e + ' 筛选';
+  /* 右侧读数已在 HTML 里注释掉，元素为 null；保留整段逻辑，元素被放回来就照旧工作 */
+  if (rvalEl){
+    const onGrid = startAt(i) === s && endAt(j) === e;
+    rvalEl.textContent = (a === null && b === null) ? '不限'
+      : (a === null ? '1–' + e : (b === null ? s + '–' + max : s + '–' + e));
+    rvalEl.classList.toggle('approx', !onGrid);
+    rvalEl.title = onGrid ? '' :
+      '滑轨停在最近的每 10 名档位，实际按 ' + s + '–' + e + ' 筛选';
+  }
 }
 
 /* 手柄归一化：左柄 ≤ blocks-1、右柄 ≥ 1、左 < 右；被拖的那个优先，越界时推另一个 */
@@ -845,9 +862,12 @@ function paint(){
   const q = document.getElementById('q').value.trim().toLowerCase();
   const [rmin, rmax] = curRange();
   const bad = (rmin !== null && rmax !== null && rmin > rmax);
-  rnoteEl.textContent = bad ? '起始名次不能大于结束名次' : (view === 'ov'
-    ? '按综合名次筛选 · 留空＝不限' : '按 CS 名次筛选 · 留空＝不限');
-  rnoteEl.classList.toggle('warn', bad);
+  /* 右对齐的说明文字随「名次区间」那一行一起收起（元素为 null）；放回来即恢复 */
+  if (rnoteEl){
+    rnoteEl.textContent = bad ? '起始名次不能大于结束名次' : (view === 'ov'
+      ? '按综合名次筛选 · 留空＝不限' : '按 CS 名次筛选 · 留空＝不限');
+    rnoteEl.classList.toggle('warn', bad);
+  }
   const items = D.map((d, i) => ({d, i})).filter(({d}) => {
     const [cn, en] = d;
     if (!visible(d)) return false;
@@ -898,7 +918,8 @@ document.querySelectorAll('.chip:not(.rngbtn)').forEach(b => b.addEventListener(
 }));
 document.getElementById('q').addEventListener('input', paint);
 
-/* 名次区间：输入框实时筛选；输入完成（change）时把数值夹到 1..当前榜上限 */
+/* #rmin / #rmax 现在是 hidden（界面上只有滑轨），这两行监听仅作为后备保留：
+   若把「名次区间」那一行放回来，输入框就会立即又能用。 */
 [rminEl, rmaxEl].forEach(el => {
   el.addEventListener('input', () => { syncRange(); syncRail(); paint(); });
   el.addEventListener('change', () => {
