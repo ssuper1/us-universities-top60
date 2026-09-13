@@ -101,7 +101,7 @@
   .schlink:hover{color:var(--blue-tx);border-bottom-color:var(--blue-tx)}
   .schlink::after{content:"↗";font-size:10.5px;margin-left:3px;vertical-align:1px;opacity:.55}
   .schlink:hover::after{opacity:1}
-  /* 综合排名前 30：可点、跳官网首页，但外观与纯文本完全一致（无下划线、无 ↗ 标记），以此与 30 名以后的入学要求链接区分 */
+  /* 综合排名前 20：可点、跳官网首页，但外观与纯文本完全一致（无下划线、无 ↗ 标记），以此与 20 名以后的入学要求链接区分 */
   .schlink.plain,.schlink.plain:hover{color:var(--t1);border-bottom:0}
   .schlink.plain::after{display:none}
   .en{display:block;font-size:11px;color:var(--t3);margin-top:0;line-height:1.25}
@@ -178,6 +178,17 @@
     .count{display:none}
     #totop{right:10px;bottom:12px;width:32px;height:32px}
   }
+  /* 榜单亮点速览：默认折叠，点标题展开（display:grid 会盖掉 [hidden]，必须显式写一条） */
+  .cardstoggle{display:inline-flex;align-items:center;gap:7px;margin:0 0 4px;padding:7px 13px;
+    background:var(--card);border:.5px solid var(--line);border-radius:10px;cursor:pointer;
+    font:500 13px/1.4 inherit;color:var(--t2);transition:color .15s,border-color .15s}
+  .cardstoggle:hover{color:var(--blue-tx);border-color:var(--blue-tx)}
+  .cardstoggle:focus-visible{outline:2px solid var(--blue-tx);outline-offset:2px}
+  .cardstoggle .ctar{display:inline-block;font-size:10px;color:var(--t3);transition:transform .18s}
+  .cardstoggle.on .ctar{transform:rotate(90deg)}
+  .cardstoggle .ctn{font-size:11px;color:var(--t3);background:var(--gray-bg);border-radius:20px;padding:1px 7px}
+  .cards[hidden]{display:none}
+  @media (prefers-reduced-motion: reduce){ .cardstoggle .ctar{transition:none} }
 </style>
 </head>
 <body>
@@ -189,7 +200,10 @@
   </div>
   <p class="meta">U.S. News 2026 全美最佳综合大学排名（前 60，因大量并列实际覆盖到第 59 名、共 63 所，表中已附「CS」列） + 2026 最佳研究生计算机科学排名（前 50，并列结构下覆盖到第 46 名、共 50 所） · 综合榜发布于 2025 年 9 月、研究生 CS 榜发布于 2026 年 4 月 · 综合 2027 版预计 2026 年 9 月 22 日上线</p>
 
-  <div class="cards">
+  <button class="cardstoggle" id="cardstoggle" type="button" aria-expanded="false" aria-controls="cards">
+    <span class="ctar" aria-hidden="true">▸</span>榜单亮点速览<span class="ctn">5 条</span>
+  </button>
+  <div class="cards" id="cards" hidden>
     <div class="card">
       <p class="k">综合榜首三名</p>
       <p class="v">普林斯顿 · MIT · 哈佛</p>
@@ -264,7 +278,7 @@
       </table>
     </div>
   </div>
-  <p class="hint" style="margin:10px 2px 0">综合排名视图里已附<strong>「CS」列</strong>（U.S. News 2026 研究生 CS 榜名次，显示「—」表示未进前 50 名，鼠标悬停可看两个榜的落差），切到「计算机专业排名」则整套表换成 CS 榜、第 5 列反过来显示综合名次，两榜可互相对照；官方研究生 CS 榜只公开到第 46 名，按并列结构即 50 所。上方<strong>「名次区间」</strong>可按当前榜的名次筛选：直接填起止数字、点 1–10 / 11–30 / 31–60 预设，或拖动<strong>「名次滑轨」</strong>的两个手柄（左＝起点、右＝终点，每 10 名吸附一档；<strong>在轨道上单击或按住拖动</strong>也能直接跳到该档位）——三种操作共用同一组数值，两边留空即不限（综合视图按综合名次、CS 视图按 CS 名次）。点击「所在州」弹出美国地图定位；点击「Bing」在新标签页搜索该校。<strong>校名本身也可点</strong>，按名次分两种：<strong>综合排名前 30</strong> 的学校跳转<strong>该校官网首页</strong>（外观与纯文本完全相同，<strong>不带下划线</strong>，靠鼠标指针和悬停提示区分——悬停会显示目标网址）；<strong>综合排名第 30 名及以后</strong>的学校跳转<strong>该校官网的研究生入学要求页</strong>（<strong>带下划线 + ↗ 标记</strong>，内容是 GPA、学历、语言成绩等硬门槛，与前者用下划线明确区分）。</p>
+  <p class="hint" style="margin:10px 2px 0">综合排名视图里已附<strong>「CS」列</strong>（U.S. News 2026 研究生 CS 榜名次，显示「—」表示未进前 50 名，鼠标悬停可看两个榜的落差），切到「计算机专业排名」则整套表换成 CS 榜、第 5 列反过来显示综合名次，两榜可互相对照；官方研究生 CS 榜只公开到第 46 名，按并列结构即 50 所。上方<strong>「名次区间」</strong>可按当前榜的名次筛选：直接填起止数字、点 1–10 / 11–30 / 31–60 预设，或拖动<strong>「名次滑轨」</strong>的两个手柄（左＝起点、右＝终点，每 10 名吸附一档；<strong>在轨道上单击或按住拖动</strong>也能直接跳到该档位）——三种操作共用同一组数值，两边留空即不限（综合视图按综合名次、CS 视图按 CS 名次）。点击「所在州」弹出美国地图定位；点击「Bing」在新标签页搜索该校。<strong>校名本身也可点</strong>，按名次分两种：<strong>综合排名前 20</strong> 的学校跳转<strong>该校官网首页</strong>（外观与纯文本完全相同，<strong>不带下划线</strong>，靠鼠标指针和悬停提示区分——悬停会显示目标网址）；<strong>综合排名第 20 名及以后</strong>的学校跳转<strong>该校官网的研究生入学要求页</strong>（<strong>带下划线 + ↗ 标记</strong>，内容是 GPA、学历、语言成绩等硬门槛，与前者用下划线明确区分）。</p>
 
   <div class="notes" style="margin:14px 0 0">
     <p><strong>关于「研究生入学要求」链接</strong>：这批链接是我在 2026-09-12 逐校打开官网核对过的，优先指向官方写明「最低入学要求 / Minimum Requirements」的那一页，而不是笼统的招生首页。<strong>本轮（9-12 晚）又整体复检了一遍</strong>：原有 45 条链接逐条请求验证——41 条直接返回正常页面；UC 戴维斯、UC 默塞德、明尼苏达三校官网对自动请求返回 403，改用浏览器方式打开确认页面正常；乔治华盛顿大学（graduate.admissions.gwu.edu）整站被 Cloudflare 拦截，脚本和浏览器都进不去，只能确认域名有效、无法验证页面内容，点击前请留意。另有 15 条链接本轮换成了更贴题的一页（下表）。几点使用提示：</p>
@@ -272,9 +286,9 @@
       <li><strong>本轮改动的 15 条链接</strong>：UT 奥斯汀（→ /admissions/apply）、普渡（→ /admissions/how-to-apply/）、德州农工（→ 国际生研究生页）三条是用户提供的；其余 12 条由本次巡检替换——UC 戴维斯（→ /minimum-requirements，页面标题就是「Admissions Minimum Requirements」）、UCSB（→ 申请与录取清单）、罗格斯（→ /application-requirements）、佐治亚大学（→ /requirements/）、凯斯西储（→ /instructions-requirements）、弗吉尼亚理工（→ /how-to-apply.html）、维克森林（→ 截止日期与项目要求）、UC 默塞德（→ 学术与申请要求，写明最低 GPA 3.0）、宾州州立（→ /how-to-apply）、马萨诸塞大学安姆斯特（→ /apply/how-apply）、UC 河滨（→ /admission-requirements）、科罗拉多博尔德（→ 写明 Minimum Admissions Requirements）。</li>
       <li><strong>美国研究生院普遍是「双重门槛」</strong>：研究生院（Graduate School）定全校最低线，各系/项目再定更高的线。你在官网上看到的「最低要求」通常只是"够资格被受理"，实际录取线更高。比如 UF 全校最低 3.0，但很多系要求 3.5+。</li>
       <li><strong>最低 GPA 常见写法是 3.0 / 4.0</strong>（UW、UT Austin、UF、UMD、Minnesota 均是），少数校写 2.75（理海）；另有不少校按「最后 60 学分 / 高年级课程」单独计算 GPA，比四年总 GPA 更容易达标——这对大三才发力的人有利。</li>
-      <li><strong>语言线各校不同</strong>：常见是托福 80–90 / 雅思 6.5–7.0，个别项目更高。表中<strong>「雅思/托福」列</strong>是各校研究生院的最低线，<strong>只照抄官网印出来的那一套，不替学校补历史分值</strong>：新旧两套并列的写「雅思/旧制(新制)」，如 <em>6.5/80(4.5)</em>；官网只挂新 6 分制的直接写 <em>7.0/4.5</em>（如 UC 戴维斯、UF、维拉诺瓦、圣塔克拉拉）；只挂旧制的写 <em>6.5/81</em>（如乔治华盛顿、UC 默塞德）；罗格斯官网按单项给分、没有总分，写成 <em>7.0/22+23+21+17</em>（写作/口语/阅读/听力）。<strong>点分数跳到该校官网原文</strong>，鼠标悬停会说明该校公布的是哪一套。本列覆盖综合排名 30–59 的 33 所（威廉与玛丽官网未公布统一最低线，显示「—」），2026-09-13 逐校核对过官网原文。</li>
+      <li><strong>语言线各校不同</strong>：常见是托福 80–90 / 雅思 6.5–7.0，个别项目更高。表中<strong>「雅思/托福」列</strong>是各校研究生院的最低线，<strong>只照抄官网印出来的那一套，不替学校补历史分值</strong>：新旧两套并列的写「雅思/旧制(新制)」，如 <em>6.5/80(4.5)</em>；官网只挂新 6 分制的直接写 <em>7.0/4.5</em>（如 UC 戴维斯、UF、维拉诺瓦、圣塔克拉拉）；只挂旧制的写 <em>6.5/81</em>（如乔治华盛顿、UC 默塞德）；罗格斯官网按单项给分、没有总分，写成 <em>7.0/22+23+21+17</em>（写作/口语/阅读/听力）。<strong>点分数跳到该校官网原文</strong>，鼠标悬停会说明该校公布的是哪一套。本列覆盖综合排名 20–59 的 43 所，全部于 2026-09-13 逐校核对官网原文；其中卡内基梅隆、埃默里官网写明语言要求<strong>由各系自定</strong>，威廉与玛丽未公布统一最低线，这三所显示文字而不是分数。</li>
       <li><strong>ETS 从 2026-01-21 起换了托福计分方式</strong>：旧制 0–120 分，新制总分 0–6 分；2026 年 1 月 21 日及以后参加的考试按新制（旧分制 2028 年 1 月才正式退场）。大多数学校如今在官网上新旧并列（上表括号内的就是新制），少数学校只挂了一整套——只挂新制的有 UC 戴维斯、UF、维拉诺瓦、圣塔克拉拉，只挂旧制的有 UC 默塞德、乔治华盛顿。<strong>「只挂一套」不等于另一套不被接受，而是官网还没更新；本列按官网现状照抄，不替你换算或补值。申请前务必按自己的考试日期对照官网原文。</strong></li>
-      <li><strong>校名没有链接的两种情况</strong>：一种是综合排名前 30（按你的要求本次只做 30 及以后）；另一种是官网没有集中写「研究生最低要求」的独立页面（例如圣塔克拉拉是各学院分别招生，这里给的是官方研究生项目总入口）。</li>
+      <li><strong>校名没有链接的两种情况</strong>：一种是综合排名前 20（本次按你的要求做到第 20 名）；另一种是官网没有集中写「研究生最低要求」的独立页面（例如圣塔克拉拉是各学院分别招生，这里给的是官方研究生项目总入口）。</li>
       <li><strong>页面会变</strong>：招生要求每年更新，申请前请以官网当年页面为准；若链接失效，用「Bing」列搜该校即可。</li>
     </ul>
   </div>
@@ -319,7 +333,7 @@
 
   <footer>
     数据来源：U.S. News &amp; World Report《2026 Best National Universities》（综合榜，2025 年 9 月发布）官方榜单及公开整理；同机构《2026 Best Computer Science Schools》（研究生 CS 榜，2026 年 4 月 7 日发布）官方榜单及公开整理，其中第 34 / 38 / 43 / 46 名四档以波士顿大学官方新闻稿直接确认 + jingsailian / gaotu 两份独立整理表互证；Niche 2027 排名、U.S. News 全球排名相关数据来自公开媒体报道。地图为美国州界拓扑（us-atlas / U.S. Census Bureau）示意图，点位为学校所在城市的大致坐标，不代表精确校区范围。排名每年变动，用作申请决策前请以官方最新发布为准。<br>
-    校名链接为各校官网的研究生入学要求 / 申请要求页面，采集并逐一核验于 2026-09-12（共 45 所，覆盖综合排名第 30 名及以后的全部学校，以及只在 CS 榜出现的学校）。研究生 CS 榜第 46 名共 5 校（BU、NC State、犹他、Vanderbilt、WUSTL）全部配链接。入学要求以官网当年页面为准。<br>
+    校名链接为各校官网的研究生入学要求 / 申请要求页面，采集并逐一核验于 2026-09-12，2026-09-13 扩充到综合排名第 20 名及以后（共 49 所，含只在 CS 榜出现的学校）。研究生 CS 榜第 46 名共 5 校（BU、NC State、犹他、Vanderbilt、WUSTL）全部配链接。入学要求以官网当年页面为准。<br>
     本文件生成于 2026-09-12（当日由本科榜切换为研究生榜）。
   </footer>
 </div>
@@ -387,16 +401,16 @@ const D = [
  ['莱斯大学', 'Rice University', 'TX', 'p', 17, 18, '休斯敦', 29.717, -95.402, 27],
  ['加州大学洛杉矶分校', 'University of California, Los Angeles', 'CA', 'u', 17, 15, '洛杉矶', 34.072, -118.444, 15],
  ['范德堡大学', 'Vanderbilt University', 'TN', 'p', 17, 18, '纳什维尔', 36.145, -86.803, 46],
- ['卡内基梅隆大学', 'Carnegie Mellon University', 'PA', 'p', 20, 21, '匹兹堡', 40.443, -79.944, 1],
- ['密歇根大学安娜堡分校', 'University of Michigan, Ann Arbor', 'MI', 'u', 20, 21, '安娜堡', 42.278, -83.738, 11],
- ['圣母大学', 'University of Notre Dame', 'IN', 'p', 20, 18, '圣母镇', 41.705, -86.235, 0],
- ['圣路易斯华盛顿大学', 'Washington University in St. Louis', 'MO', 'p', 20, 21, '圣路易斯', 38.648, -90.305, 46],
- ['埃默里大学', 'Emory University', 'GA', 'p', 24, 24, '亚特兰大', 33.793, -84.324, 0],
- ['乔治城大学', 'Georgetown University', 'DC', 'p', 24, 24, '华盛顿', 38.908, -77.073, 0],
- ['北卡罗来纳大学教堂山分校', 'University of North Carolina, Chapel Hill', 'NC', 'u', 26, 27, '教堂山', 35.912, -79.052, 27],
- ['弗吉尼亚大学', 'University of Virginia', 'VA', 'u', 26, 24, '夏洛茨维尔', 38.035, -78.503, 34],
- ['南加州大学', 'University of Southern California', 'CA', 'p', 28, 27, '洛杉矶', 34.022, -118.285, 21],
- ['加州大学圣地亚哥分校', 'University of California, San Diego', 'CA', 'u', 29, 29, '拉霍亚', 32.88, -117.234, 12],
+ ['卡内基梅隆大学', 'Carnegie Mellon University', 'PA', 'p', 20, 21, '匹兹堡', 40.443, -79.944, 1, 'https://www.cmu.edu/graduate/prospective/index.html'],
+ ['密歇根大学安娜堡分校', 'University of Michigan, Ann Arbor', 'MI', 'u', 20, 21, '安娜堡', 42.278, -83.738, 11, 'https://rackham.umich.edu/admissions/applying/tests/'],
+ ['圣母大学', 'University of Notre Dame', 'IN', 'p', 20, 18, '圣母镇', 41.705, -86.235, 0, 'https://graduateschool.nd.edu/admissions/international-students/'],
+ ['圣路易斯华盛顿大学', 'Washington University in St. Louis', 'MO', 'p', 20, 21, '圣路易斯', 38.648, -90.305, 46, 'https://oiss.washu.edu/english-proficiency-requirements/'],
+ ['埃默里大学', 'Emory University', 'GA', 'p', 24, 24, '亚特兰大', 33.793, -84.324, 0, 'https://gs.emory.edu/admissions/international_appls.html'],
+ ['乔治城大学', 'Georgetown University', 'DC', 'p', 24, 24, '华盛顿', 38.908, -77.073, 0, 'https://grad.georgetown.edu/admissions/application-information/'],
+ ['北卡罗来纳大学教堂山分校', 'University of North Carolina, Chapel Hill', 'NC', 'u', 26, 27, '教堂山', 35.912, -79.052, 27, 'https://gradschool.unc.edu/admissions/'],
+ ['弗吉尼亚大学', 'University of Virginia', 'VA', 'u', 26, 24, '夏洛茨维尔', 38.035, -78.503, 34, 'https://graduate.as.virginia.edu/requirements'],
+ ['南加州大学', 'University of Southern California', 'CA', 'p', 28, 27, '洛杉矶', 34.022, -118.285, 21, 'https://gradadm.usc.edu/international-students/english-proficiency/'],
+ ['加州大学圣地亚哥分校', 'University of California, San Diego', 'CA', 'u', 29, 29, '拉霍亚', 32.88, -117.234, 12, 'https://grad.ucsd.edu/admissions/requirements/international-students/index.html'],
  ['佛罗里达大学', 'University of Florida', 'FL', 'u', 30, 30, '盖恩斯维尔', 29.646, -82.345, 0, 'https://gradcatalog.ufl.edu/graduate/admission'],
  ['德克萨斯大学奥斯汀分校', 'University of Texas at Austin', 'TX', 'u', 30, 30, '奥斯汀', 30.286, -97.739, 10, 'https://graduate.utexas.edu/admissions/apply'],
  ['佐治亚理工学院', 'Georgia Institute of Technology', 'GA', 'u', 32, 33, '亚特兰大', 33.775, -84.396, 7, 'https://grad.gatech.edu/admissions'],
@@ -439,7 +453,7 @@ const D = [
 
 ];
 
-/* 综合排名前 30 的学校官网首页（校名可点 → 官网首页；外观保持纯文本，不加下划线，以区别于 30 名以后的入学要求链接）。
+/* 综合排名前 20 的学校官网首页（校名可点 → 官网首页；外观保持纯文本，不加下划线，以区别于 20 名以后的入学要求链接）。
    均为 2026-09-12 逐条请求核验通过的官网首页地址。 */
 const SITE = {
   '普林斯顿大学':'https://www.princeton.edu',
@@ -484,6 +498,24 @@ const TAG = {u:['u','公立'], i:['i','藤校'], p:['p','私立']};
    2026-09-13 逐校核对官网原文；键为校名，值 = [分数文本, 详情页 URL, 可选提示语]
    （URL 为空则回退到数据表里的入学要求链接）。 */
 const ENG = {
+  '卡内基梅隆大学': ['各系自定', 'https://www.cmu.edu/graduate/prospective/index.html',
+    '无校级统一最低分，各项目自定；例：工程学院生物医学工程要雅思 7.0 / 托福 86'],
+  '密歇根大学安娜堡分校': ['6.5/84(4.5)', 'https://rackham.umich.edu/admissions/applying/tests/'],
+  '圣母大学': ['7.0/80(4.5)', 'https://graduateschool.nd.edu/admissions/international-students/'],
+  '圣路易斯华盛顿大学': ['6.5/90(5.0)', 'https://oiss.washu.edu/english-proficiency-requirements/',
+    '为校级最低线，部分学院/项目高于此'],
+  '埃默里大学': ['各系自定', 'https://gs.emory.edu/admissions/international_appls.html',
+    '无校级数值，语言要求按项目自定；例：计算机博士要托福 85 / 雅思 7'],
+  '乔治城大学': ['7.0/80(4.0)', 'https://grad.georgetown.edu/admissions/application-information/',
+    '按项目分档：雅思 7.0 或 7.5，托福 80 或 100，新制 4 或 5；表中为下限'],
+  '北卡罗来纳大学教堂山分校': ['7.0/90(5.0)', 'https://gradschool.unc.edu/admissions/',
+    '2026-01-26 起按新制；研究生院基线，部分院系更高'],
+  '弗吉尼亚大学': ['7.0/90(4.5)', 'https://graduate.as.virginia.edu/requirements',
+    '雅思要求四个单项均达 7.0'],
+  '南加州大学': ['6.5/90(4.5)', 'https://gradadm.usc.edu/international-students/english-proficiency/',
+    'USC 明言不设校级最低分，此为硕士免 ISE 考试线；博士为 7.0 / 100(5.0)'],
+  '加州大学圣地亚哥分校': ['7.0/85(4.5)', 'https://grad.ucsd.edu/admissions/requirements/international-students/index.html',
+    '校级最低线；部分项目更高'],
   '佛罗里达大学': ['6.5/4.5', 'https://www.admissions.ufl.edu/apply/graduate/international/'],
   '德克萨斯大学奥斯汀分校': ['6.5/79(4.0)', 'https://graduate.utexas.edu/admissions/apply'],
   '佐治亚理工学院': ['7.0/90(4.5)', 'https://grad.gatech.edu/admissions'],
@@ -707,17 +739,14 @@ function overallText(rk){
    · 综合排名前 30        → 跳该校官网首页，外观与纯文本完全一致（无下划线、无标记），只靠鼠标指针和悬停提示区分
    · 其余（无链接数据）    → 纯文本 */
 function nameCell(d){
-  const cn = d[0], en = d[1], rk = d[4], req = d[10], site = SITE[cn];
+  const cn = d[0], en = d[1], req = d[10], site = SITE[cn];
   let name;
-  if (req && rk >= 30){
+  if (req){
     name = '<a class="schlink" href="' + req + '" target="_blank" rel="noopener noreferrer"'
       + ' title="打开 ' + cn + ' 官网的研究生入学要求">' + cn + '</a>';
   } else if (site){
     name = '<a class="schlink plain" href="' + site + '" target="_blank" rel="noopener noreferrer"'
       + ' title="打开 ' + cn + ' 官网首页（' + site.replace(/^https:\/\//, '') + '）">' + cn + '</a>';
-  } else if (req){
-    name = '<a class="schlink" href="' + req + '" target="_blank" rel="noopener noreferrer"'
-      + ' title="打开 ' + cn + ' 官网的研究生入学要求">' + cn + '</a>';
   } else {
     name = '<span class="cn">' + cn + '</span>';
   }
@@ -937,6 +966,17 @@ TOP.addEventListener('click', () => {
 window.addEventListener('scroll', syncTop, { passive: true });
 window.addEventListener('resize', syncTop, { passive: true });
 syncTop();
+
+/* ---------- 榜单亮点速览：默认收起，点标题展开 ---------- */
+const CT = document.getElementById('cardstoggle'), CD = document.getElementById('cards');
+if (CT && CD){
+  CT.addEventListener('click', () => {
+    const open = CD.hidden;
+    CD.hidden = !open;
+    CT.setAttribute('aria-expanded', String(open));
+    CT.classList.toggle('on', open);
+  });
+}
 
 renderShell();
 paint();
