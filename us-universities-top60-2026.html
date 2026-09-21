@@ -129,15 +129,40 @@
   .csrk{font-variant-numeric:tabular-nums;cursor:help}
   .csrk.top{font-weight:600;color:var(--blue-tx)}
   .csrk.off{color:var(--t3)}
-  /* 英语要求列：雅思 / 托福（括号内为 2026-01-21 起 ETS 新 6 分制托福分） */
-  .eng{color:var(--blue-tx);text-decoration:none;white-space:nowrap;cursor:pointer;
-    font-variant-numeric:tabular-nums;border-bottom:1px solid rgba(24,95,165,.35)}
-  .eng:hover{border-bottom-color:var(--blue-tx)}
+  /* 英语要求列：雅思 / 托福（括号内为 2026-01-21 起 ETS 新 6 分制托福分）。
+     默认灰色＝整理自官网但未经逐条确认；只有 .v（用户亲自核过原文，见脚本里的 USER_OK）回到蓝色。 */
+  .eng{color:var(--t2);text-decoration:none;white-space:nowrap;cursor:pointer;
+    font-variant-numeric:tabular-nums;border-bottom:1px solid var(--line)}
+  .eng:hover{border-bottom-color:var(--t2)}
   .eng::after{content:"↗";font-size:10px;margin-left:2px;vertical-align:1px;opacity:.5}
   .eng:hover::after{opacity:1}
   .eng .new{color:var(--t3);font-size:11.5px;margin-left:1px}
   .eng.off{color:var(--t3);cursor:default;border-bottom:0}
   .eng.off::after{display:none}
+  .eng.v{color:var(--blue-tx);border-bottom-color:rgba(24,95,165,.35)}
+  .eng.v:hover{border-bottom-color:var(--blue-tx)}
+  /* GRE 列：✅ 硬性要求 / ❌ 不要求（「可选」也归这里）/ 院系 跳项目页 / — 未核实（只放符号或最少的字，结论见悬停提示）。灰蓝规则同英语要求列 */
+  .gre{color:var(--t2);text-decoration:none;white-space:nowrap;cursor:pointer;font-variant-numeric:tabular-nums}
+  .gre:hover{color:var(--blue-tx)}
+  .gre::after{content:"↗";font-size:10px;margin-left:2px;vertical-align:1px;opacity:.5}
+  .gre:hover::after{opacity:1}
+  .gre.off{color:var(--t3);cursor:default}
+  .gre.off::after{display:none}
+  .gre.v{color:var(--blue-tx)}
+  /* 触屏没有鼠标悬停：带备注的格子（见脚本里的 noteI）在数字后多一个 ⓘ，点开在该行下方铺一行小字。
+     指针设备上这个按钮不出现，仍走 title 悬停。 */
+  .note-i{display:none}
+  @media (hover:none),(pointer:coarse){
+    .note-i{display:inline-block;margin-left:2px;padding:3px 4px;border:0;background:none;
+      font:inherit;font-size:11px;line-height:1;color:var(--t3);cursor:pointer;vertical-align:1px}
+    .note-i.on{color:var(--blue-tx)}
+  }
+  /* 备注条：跨满整行，但表格本身是横向滚动的，所以文字用 sticky 钉在可视区左边缘——
+     滑到哪一列点开都读得到，不用再滑回左边 */
+  tr.noterow td{padding:6px 9px 9px;background:#fafaf8}
+  tr.noterow .cnb{position:sticky;left:6px;display:inline-block;max-width:calc(100vw - 40px);
+    white-space:normal;color:var(--t2);font-size:12px;line-height:1.6}
+  tr.noterow .cnb b{color:var(--t1);font-weight:500}
   /* overscroll-behavior-x：表格横滑到底时不要顺带把整页左右晃
      （手机端横向链式回弹会让人误以为页面在抖） */
   .tbl-scroll{overflow:auto;overscroll-behavior-x:contain}
@@ -225,12 +250,13 @@
 
   /* ---------- 外链点击手感 ---------- */
   /* touch-action:manipulation 关掉移动端「双击缩放」的等待判定，iOS 上点击可省约 300ms */
-  .schlink,.eng,.bing,.stlink{touch-action:manipulation}
+  .schlink,.eng,.gre,.bing,.stlink{touch-action:manipulation}
   /* 手指按下的那一瞬间就有反馈，不用干等新页面开始加载 */
-  .schlink:active,.eng:active,.bing:active{background:var(--blue-bg);border-radius:3px}
+  .schlink:active,.eng:active,.gre:active,.bing:active{background:var(--blue-bg);border-radius:3px}
   /* 已触发跳转、但目标页还没出现：把 ↗ 换成一闪一闪的省略号，明确「点到了、正在开」 */
   .schlink.is-loading::after{content:"…";font-size:12px;font-weight:600;opacity:1;animation:ldblink .7s steps(1,end) infinite}
   .eng.is-loading::after{content:"…";font-size:12px;font-weight:600;opacity:1;animation:ldblink .7s steps(1,end) infinite}
+  .gre.is-loading::after{content:"…";font-size:12px;font-weight:600;opacity:1;animation:ldblink .7s steps(1,end) infinite}
   .bing.is-loading::after{content:"…";animation:ldblink .7s steps(1,end) infinite}
   @keyframes ldblink{0%,55%{opacity:1}55.01%,100%{opacity:.2}}
 
@@ -337,26 +363,27 @@
       </table>
     </div>
   </div>
-  <p class="hint" style="margin:10px 2px 0">上方可按<strong>当前榜的名次</strong>筛选：拖动<strong>「名次滑轨」</strong>的两个手柄（每 10 名吸附一档；两边留空＝不限），或点它右边的 1–10 / 11–30 / 31–60 快捷区间。点「所在州」在地图上定位，点「Bing」开新标签页搜索，点<strong>校名</strong>跳官网——<strong>综合排名第 20 名之前</strong>跳官网首页（外观与正文一样、不带下划线），<strong>第 20 名及以后</strong>跳该校研究生入学要求页（带下划线 + ↗ 标记）；点「雅思/托福」那一格里的分数，跳到该校官网原文。</p>
+  <p class="hint" style="margin:10px 2px 0">上方可按<strong>当前榜的名次</strong>筛选：拖动<strong>「名次滑轨」</strong>的两个手柄（每 10 名吸附一档；两边留空＝不限），或点它右边的 1–10 / 11–30 / 31–60 快捷区间。点「所在州」在地图上定位，点「Bing」开新标签页搜索，点<strong>校名</strong>跳官网——<strong>综合排名第 20 名之前</strong>跳官网首页（外观与正文一样、不带下划线），<strong>第 20 名及以后</strong>跳该校研究生入学要求页（带下划线 + ↗ 标记）；点「雅思/托福」那一格里的分数、或「GRE」那一格的结论，跳到该校官网原文。两列都用颜色区分来源：<strong>蓝色＝已人工逐条核对过官网原文，灰色＝由公开资料整理、尚未核对</strong>。<strong>手机上没有鼠标悬停</strong>，所以「雅思/托福」和「GRE」两列里<strong>带备注的格子会在数值后多一个 ⓘ</strong>：点它在该行下方铺出一条小字（内容与电脑上悬停看到的一样），再点收起；不带 ⓘ 的格子说明悬停里没有额外信息。电脑上不显示 ⓘ，仍然用鼠标悬停。</p>
 
   <button class="ddtoggle" id="ddtoggle" type="button" aria-expanded="false" aria-controls="ddbody">
     <span class="ddar" aria-hidden="true">▸</span>
     <span class="ddtx">展开完整说明与榜单解读</span>
-    <span class="ddmeta">约 6,100 字 · 使用详解 / 数据核验记录 / 两张榜怎么读 / 其他榜单</span>
+    <span class="ddmeta">约 7,800 字 · 使用详解 / 数据核验记录 / 两张榜怎么读 / 其他榜单</span>
   </button>
   <div class="ddbody" id="ddbody" hidden></div>
   <!-- 下面这整段是「点开才加载」的长文：放在 template 里不会参与首次布局与绘制 -->
   <template id="ddtpl">
-  <p class="hint" style="margin:0 2px 12px">综合排名视图里已附<strong>「CS」列</strong>（U.S. News 2026 研究生 CS 榜名次，显示「—」表示未进前 50 名，鼠标悬停可看两个榜的落差），切到「计算机专业排名」则整套表换成 CS 榜、第 5 列反过来显示综合名次，两榜可互相对照；官方研究生 CS 榜只公开到第 46 名，按并列结构即 50 所。上方<strong>「名次滑轨」</strong>可按当前榜的名次筛选：拖动两个手柄（左＝起点、右＝终点，每 10 名吸附一档；<strong>在轨道上单击或按住拖动</strong>也能直接跳到该档位），或点它右边的 1–10 / 11–30 / 31–60 快捷区间——两种操作共用同一组数值，两边留空即不限（综合视图按综合名次、CS 视图按 CS 名次）。点击「所在州」弹出美国地图定位；点击「Bing」在新标签页搜索该校。<strong>校名本身也可点</strong>，按名次分两种：<strong>第 20 名之前</strong>的学校跳转<strong>该校官网首页</strong>（外观与纯文本完全相同，<strong>不带下划线</strong>，靠鼠标指针和悬停提示区分——悬停会显示目标网址）；<strong>第 20 名及以后</strong>的学校跳转<strong>该校官网的研究生入学要求页</strong>（<strong>带下划线 + ↗ 标记</strong>，内容是 GPA、学历、语言成绩等硬门槛，与前者用下划线明确区分）。</p>
+  <p class="hint" style="margin:0 2px 12px">综合排名视图里已附<strong>「CS」列</strong>（U.S. News 2026 研究生 CS 榜名次，显示「—」表示未进前 50 名，鼠标悬停可看两个榜的落差），切到「计算机专业排名」则整套表换成 CS 榜、第 5 列反过来显示综合名次，两榜可互相对照；官方研究生 CS 榜只公开到第 46 名，按并列结构即 50 所。上方<strong>「名次滑轨」</strong>可按当前榜的名次筛选：拖动两个手柄（左＝起点、右＝终点，每 10 名吸附一档；<strong>在轨道上单击或按住拖动</strong>也能直接跳到该档位），或点它右边的 1–10 / 11–30 / 31–60 快捷区间——两种操作共用同一组数值，两边留空即不限（综合视图按综合名次、CS 视图按 CS 名次）。点击「所在州」弹出美国地图定位；点击「Bing」在新标签页搜索该校。<strong>校名本身也可点</strong>，按名次分两种：<strong>第 20 名之前</strong>的学校跳转<strong>该校官网首页</strong>（外观与纯文本完全相同，<strong>不带下划线</strong>，靠鼠标指针和悬停提示区分——悬停会显示目标网址）；<strong>第 20 名及以后</strong>的学校跳转<strong>该校官网的研究生入学要求页</strong>（<strong>带下划线 + ↗ 标记</strong>，内容是 GPA、学历、语言成绩等硬门槛，与前者用下划线明确区分）。最右侧的<strong>「雅思/托福」与「GRE」两列</strong>给出该校研究生申请的语言线和 GRE 要求：<strong>「GRE」列</strong>只回答「GRE 是不是<strong>硬性要求</strong>」——✅（硬性要求）/ ❌（不要求，<strong>「可选」也归到这一格</strong>，因为交不交都能申请）/ <strong>院系</strong>（这一格不判定要不要，只做<strong>跳转到该校园系项目页</strong>的入口）/ —（尚未核实）；只放符号或最少的字，鼠标悬停看完整结论（只列 GRE 普通考试，专项考试不论），点它跳官网原文。<strong>两列的颜色代表核实程度：蓝色 ＝ 已人工逐条打开官网原文核对过，灰色 ＝ 按公开资料整理、尚未逐条核对</strong>；灰色不代表数据有问题，只表示还没确认到原文一级。</p>
 
   <div class="notes" style="margin:14px 0 0">
     <p><strong>关于「研究生入学要求」链接</strong>：这批链接是我在 2026-09-12 逐校打开官网核对过的，优先指向官方写明「最低入学要求 / Minimum Requirements」的那一页，而不是笼统的招生首页。<strong>本轮（9-12 晚）又整体复检了一遍</strong>：原有 45 条链接逐条请求验证——41 条直接返回正常页面；UC 戴维斯、UC 默塞德、明尼苏达三校官网对自动请求返回 403，改用浏览器方式打开确认页面正常；乔治华盛顿大学（graduate.admissions.gwu.edu）整站被 Cloudflare 拦截，脚本和浏览器都进不去，只能确认域名有效、无法验证页面内容，点击前请留意。另有 15 条链接本轮换成了更贴题的一页（下表）。几点使用提示：</p>
     <ul>
       <li><strong>本轮改动的 15 条链接</strong>：UT 奥斯汀（→ /admissions/apply）、普渡（→ /admissions/how-to-apply/）、德州农工（→ 国际生研究生页）三条是用户提供的；其余 12 条由本次巡检替换——UC 戴维斯（→ /minimum-requirements，页面标题就是「Admissions Minimum Requirements」）、UCSB（→ 申请与录取清单）、罗格斯（→ /application-requirements）、佐治亚大学（→ /requirements/）、凯斯西储（→ /instructions-requirements）、弗吉尼亚理工（→ /how-to-apply.html）、维克森林（→ 截止日期与项目要求）、UC 默塞德（→ 学术与申请要求，写明最低 GPA 3.0）、宾州州立（→ /how-to-apply）、马萨诸塞大学安姆斯特（→ /apply/how-apply）、UC 河滨（→ /admission-requirements）、科罗拉多博尔德（→ 写明 Minimum Admissions Requirements）。</li>
-      <li><strong>美国研究生院普遍是「双重门槛」</strong>：研究生院（Graduate School）定全校最低线，各系/项目再定更高的线。你在官网上看到的「最低要求」通常只是"够资格被受理"，实际录取线更高。比如 UF 全校最低 3.0，但很多系要求 3.5+。</li>
+      <li><strong>美国研究生院普遍是「双重门槛」</strong>：研究生院（Graduate School）定全校最低线，各系/项目再定更高的线。你在官网上看到的「最低要求」通常只是"够资格被受理"，实际录取线更高。以 UF 为例：研究生院写的是「B for all upper-level courses」，而 CISE 系写明录取者的本科 GPA 多在 <strong>3.3/4.0 以上</strong>；语言线院线是托福 80 / 雅思 6.5，系线托福 90 / 雅思 7.5，表中直接写了系线。</li>
       <li><strong>最低 GPA 常见写法是 3.0 / 4.0</strong>（UW、UT Austin、UF、UMD、Minnesota 均是），少数校写 2.75（理海）；另有不少校按「最后 60 学分 / 高年级课程」单独计算 GPA，比四年总 GPA 更容易达标——这对大三才发力的人有利。</li>
-      <li><strong>语言线各校不同</strong>：常见是托福 80–90 / 雅思 6.5–7.0，个别项目更高。表中<strong>「雅思/托福」列</strong>是各校研究生院的最低线，<strong>只照抄官网印出来的那一套，不替学校补历史分值</strong>：新旧两套并列的写「雅思/旧制(新制)」，如 <em>6.5/80(4.5)</em>；官网只挂新 6 分制的直接写 <em>7.0/4.5</em>（如 UC 戴维斯、UF、维拉诺瓦、圣塔克拉拉）；只挂旧制的写 <em>6.5/81</em>（如乔治华盛顿、UC 默塞德）；罗格斯官网按单项给分、没有总分，写成 <em>7.0/22+23+21+17</em>（写作/口语/阅读/听力）。<strong>点分数跳到该校官网原文</strong>，鼠标悬停会说明该校公布的是哪一套。本列覆盖综合排名 20–59 的 43 所，全部于 2026-09-13 逐校核对官网原文；其中卡内基梅隆、埃默里官网写明语言要求<strong>由各系自定</strong>，威廉与玛丽未公布统一最低线，这三所显示文字而不是分数。</li>
-      <li><strong>ETS 从 2026-01-21 起换了托福计分方式</strong>：旧制 0–120 分，新制总分 0–6 分；2026 年 1 月 21 日及以后参加的考试按新制（旧分制 2028 年 1 月才正式退场）。大多数学校如今在官网上新旧并列（上表括号内的就是新制），少数学校只挂了一整套——只挂新制的有 UC 戴维斯、UF、维拉诺瓦、圣塔克拉拉，只挂旧制的有 UC 默塞德、乔治华盛顿。<strong>「只挂一套」不等于另一套不被接受，而是官网还没更新；本列按官网现状照抄，不替你换算或补值。申请前务必按自己的考试日期对照官网原文。</strong></li>
+      <li><strong>语言线各校不同</strong>：常见是托福 80–90 / 雅思 6.5–7.0，个别项目更高。表中<strong>「雅思/托福」列</strong>默认取各校研究生院的统一最低线，<strong>若官网同时给出更高的系线就直接写系线</strong>（如 UF 的 CISE 系、UCSB 的 CS 硕士项目页），悬停提示里会说明院线是多少。<strong>只照抄官网印出来的那一套，不替学校补历史分值</strong>：新旧两套并列的写「雅思/旧制(新制)」，如 <em>6.5/80(4.5)</em>；官网只挂新 6 分制的直接写 <em>7.0/4.5</em>（如 UC 戴维斯、维拉诺瓦、圣塔克拉拉）；只挂旧制的写 <em>6.5/81</em>（如乔治华盛顿、UC 默塞德）；罗格斯官网按单项给分、没有总分，写成 <em>7.0/22+23+21+17</em>（写作/口语/阅读/听力）。华盛顿大学官网把语言线<strong>分成两档</strong>——<em>Minimum Required Score (ELP Not Satisfied)</em> 是新托福 4.0 / 托福 80 / MyBest 80 / 多邻国 110 / 雅思 6.5，<em>Recommended Score (ELP Satisfied)</em> 是 4.5 / 92 / 92 / 125 / 7.0；<strong>表中取前者</strong>（真正的最低受理线），推荐分写在悬停提示里。<strong>点分数跳到该校官网原文</strong>，鼠标悬停会说明该校公布的是哪一套。本列覆盖综合排名 20–59 的 43 所，整理自各校官网（2026-09-13 起逐校核对；<strong>蓝色＝已逐条打开原文确认，灰色＝尚未确认到原文一级</strong>）；其中卡内基梅隆、埃默里官网写明语言要求<strong>由各系自定</strong>，威廉与玛丽未公布统一最低线，这三所显示文字而不是分数。</li>
+      <li><strong>「GRE」列</strong>：只看研究生申请是否需要 <strong>GRE 普通考试（General Test）</strong>，专项考试不在本列范围。<strong>判定口径是「硬性要求」</strong>：显示 <strong>✅ 硬性要求 / ❌ 不要求（官网写 optional、可自愿提交的也归这一格）/ 院系 / — 尚未核实</strong>；「院系」表示这一格不做判定，只用来<strong>跳转到该校园系项目页</strong>（目前是东北大学 → Khoury 计算机学院硕士申请页、普渡大学 → 研究生项目检索页）。目前逐个核过官网原文的有六所：加州大学圣塔芭芭拉分校（Engage 系统的 CS 硕士项目页写明<strong>不需要</strong>，托福/雅思分同样取自该页）、佛罗里达大学（CISE 系招生页写明 general GRE 是 <strong>optional</strong>、Verbal 期望至少 140；同页写明录取者本科 GPA 多在 3.3/4.0 以上，但那是录取者常见水平、不是官网写的硬性最低线，研究生院层面只写 B）、加州大学戴维斯分校（<strong>截止日期表</strong>里 CS 硕士 / 博士那一行写「GRE not required or accepted」，即<strong>不要求也不接收</strong>）、加州大学圣地亚哥分校（MAS-DSE 项目页写明<strong>不要求</strong>，考过可自愿提交）、加州大学默塞德分校（<strong>按项目列名单</strong>：只有政治学要求，EECS 硕士等列为可选，<strong>不在名单上的项目一律无需提交</strong>）、华盛顿大学（项目页写 <strong>GRE Requirement: Not Considered</strong>，即不要求、交了也不看；但要留意那一页是 <strong>BS/MS</strong> 项目页、只收 UW 本校本科生，Allen School 的博士申请页已不再提 GRE）。其余显示 <em>—</em> 表示<strong>尚未核实，不是「不要求」</strong>——例如 UT 奥斯汀，研究生院页写「Most programs require the GRE or GMAT，具体问项目」，而 CS 系申请页写「GRE General Score (optional for Fall 2025)」，两处口径不一致且系页那行还停在 2025 年，就没有落成结论。与语言线一样，蓝色＝已确认到原文，灰色＝尚未确认。</li>
+      <li><strong>ETS 从 2026-01-21 起换了托福计分方式</strong>：旧制 0–120 分，新制总分 0–6 分；2026 年 1 月 21 日及以后参加的考试按新制（旧分制 2028 年 1 月才正式退场）。大多数学校如今在官网上新旧并列（上表括号内的就是新制），少数学校只挂了一整套——只挂新制的有 UC 戴维斯、维拉诺瓦、圣塔克拉拉，只挂旧制的有 UC 默塞德、乔治华盛顿（UF 的 CISE 系页仍只按旧制写托福 90，其国际生页已改新制；表里取的是系线）。<strong>「只挂一套」不等于另一套不被接受，而是官网还没更新；本列按官网现状照抄，不替你换算或补值。申请前务必按自己的考试日期对照官网原文。</strong></li>
       <li><strong>校名没有链接的两种情况</strong>：一种是综合排名第 20 名之前（本次按你的要求做到第 20 名）；另一种是官网没有集中写「研究生最低要求」的独立页面（例如圣塔克拉拉是各学院分别招生，这里给的是官方研究生项目总入口）。</li>
       <li><strong>页面会变</strong>：招生要求每年更新，申请前请以官网当年页面为准；若链接失效，用「Bing」列搜该校即可。</li>
     </ul>
@@ -562,71 +589,114 @@ const TAG = {u:['u','公立'], i:['i','藤校'], p:['p','私立']};
    · 官网只挂新 6 分制   → '雅思/新制'，如 '7.0/4.5'（不补旧制 80）
    · 官网只挂旧 0–120 制 → '雅思/旧制'，如 '6.5/81'
    · 官网按单项给分     → '雅思/22+23+21+17'（写作/口语/阅读/听力），并在第三个字段里说明
-   取值为研究生院（Graduate School）全校最低线，各系/项目可能更高。
+   取值优先取研究生院（Graduate School）全校最低线；若官网同时给出更高的系线（如 UF 的 CISE 系），
+   则直接写系线，并在第三个字段里说明院线是多少。
+   若全校根本没有统一线（如密歇根 Rackham）→ 写「各系自定」；只有学院线时，第三个字段里写明是哪个学院。
    2026-09-13 逐校核对官网原文；键为校名，值 = [分数文本, 详情页 URL, 可选提示语]
-   （URL 为空则回退到数据表里的入学要求链接）。 */
+   （URL 为空则回退到数据表里的入学要求链接）。
+   颜色：默认灰色；只有 USER_OK 里的学校（用户亲自核过原文）用蓝色。 */
 const ENG = {
   '卡内基梅隆大学': ['各系自定', 'https://www.cmu.edu/graduate/prospective/index.html',
-    '无校级统一最低分，各项目自定；例：工程学院生物医学工程要雅思 7.0 / 托福 86'],
-  '密歇根大学安娜堡分校': ['6.5/84(4.5)', 'https://rackham.umich.edu/admissions/applying/tests/'],
+    '无校级统一线，各项目自定\n例：生物医学工程 雅思 7.0 / 托福 86'],
+  '密歇根大学安娜堡分校': ['各系自定', 'https://rackham.umich.edu/admissions/applying/tests/',
+    'Rackham 不设统一分数，由各项目定'],
   '圣母大学': ['7.0/80(4.5)', 'https://graduateschool.nd.edu/admissions/international-students/'],
   '圣路易斯华盛顿大学': ['6.5/90(5.0)', 'https://oiss.washu.edu/english-proficiency-requirements/',
-    '为校级最低线，部分学院/项目高于此'],
-  '埃默里大学': ['各系自定', 'https://gs.emory.edu/admissions/international_appls.html',
-    '无校级数值，语言要求按项目自定；例：计算机博士要托福 85 / 雅思 7'],
-  '乔治城大学': ['7.0/80(4.0)', 'https://grad.georgetown.edu/admissions/application-information/',
-    '按项目分档：雅思 7.0 或 7.5，托福 80 或 100，新制 4 或 5；表中为下限'],
-  '北卡罗来纳大学教堂山分校': ['7.0/90(5.0)', 'https://gradschool.unc.edu/admissions/',
-    '2026-01-26 起按新制；研究生院基线，部分院系更高'],
-  '弗吉尼亚大学': ['7.0/90(4.5)', 'https://graduate.as.virginia.edu/requirements',
-    '雅思要求四个单项均达 7.0'],
-  '南加州大学': ['6.5/90(4.5)', 'https://gradadm.usc.edu/international-students/english-proficiency/',
-    'USC 明言不设校级最低分，此为硕士免 ISE 考试线；博士为 7.0 / 100(5.0)'],
-  '加州大学圣地亚哥分校': ['7.0/85(4.5)', 'https://grad.ucsd.edu/admissions/requirements/international-students/index.html',
     '校级最低线；部分项目更高'],
-  '佛罗里达大学': ['6.5/4.5', 'https://www.admissions.ufl.edu/apply/graduate/international/'],
-  '德克萨斯大学奥斯汀分校': ['6.5/79(4.0)', 'https://graduate.utexas.edu/admissions/apply'],
-  '佐治亚理工学院': ['7.0/90(4.5)', 'https://grad.gatech.edu/admissions'],
-  '纽约大学': ['7.0/100(5.0)', 'https://www.nyu.edu/admissions/graduate-admissions/application-requirements.html'],
-  '加州大学戴维斯分校': ['7.0/4.5', 'https://grad.ucdavis.edu/english-language-examinations'],
+  '埃默里大学': ['各系自定', 'https://gs.emory.edu/admissions/international_appls.html',
+    '无校级数值，各项目自定\n例：计算机博士 托福 85 / 雅思 7'],
+  '乔治城大学': ['7.0/80(4.0)', 'https://grad.georgetown.edu/admissions/application-information/',
+    '按项目分档，表中为下限\n雅思 7.0/7.5、托福 80/100（新制 4/5）'],
+  '北卡罗来纳大学教堂山分校': ['7.0/90(5.0)', 'https://gradschool.unc.edu/admissions/instructions/#intl',
+    '研究生院基线；2026-01-26 起按新制'],
+  '弗吉尼亚大学': ['7.0/90(4.5)', 'https://graduate.as.virginia.edu/requirements',
+    '雅思四个单项都要 7.0'],
+  '南加州大学': ['6.5/90(4.5)', 'https://gradadm.usc.edu/prospective-international-students/english-proficiency/',
+    '不设校级最低线，此为硕士免 ISE 档\n单项 新托福 4+ / 雅思 6+；博士 100 / 7.0'],
+  '加州大学圣地亚哥分校': ['7.0/85(4.5)', 'https://grad.ucsd.edu/admissions/requirements/international-students/english-proficiency.html#ielts',
+    '校级最低线；部分项目更高'],
+  '佛罗里达大学': ['7.5/90', 'https://cise.ufl.edu/admissions/graduate/',
+    'CISE 系：雅思 7.5 / 托福 90（单项 ≥19）\n研究生院线：6.5/80'],
+  '德克萨斯大学奥斯汀分校': ['6.5/79(4.0)', 'https://graduate.utexas.edu/admissions/apply/international'],
+  '佐治亚理工学院': ['7.0/90(4.5)', 'https://grad.gatech.edu/english-proficiency'],
+  '纽约大学': ['7.0/100(5.0)', 'https://steinhardt.nyu.edu/graduate_admissions/guide/testing',
+    '无全校统一线；此为 Steinhardt 学院线'],
+  '加州大学戴维斯分校': ['7.0/4.5', 'https://grad.ucdavis.edu/english-language-examinations',
+    '校级最低线，个别项目更高\n只挂新 6 分制；院校代码 4834（无系别代码）'],
   '加州大学尔湾分校': ['7.0/80(4.0)', 'https://grad.uci.edu/admissions/applying-to-uci/'],
-  '波士顿学院': ['7.0/100(5.0)', ''],
+  '波士顿学院': ['7.0/100(5.0)', 'https://www.bc.edu/bc-web/schools/morrissey/graduate/admission.html'],
   '塔夫茨大学': ['6.5/90(4.5)', 'https://asegrad.tufts.edu/applying/requirements/international-student-requirements'],
   '伊利诺伊大学厄巴纳-香槟分校': ['6.5/79(4.0)', 'https://grad.illinois.edu/Admissions/instructions/04c'],
-  '威斯康星大学麦迪逊分校': ['7.0/92(5.0)', 'https://grad.wisc.edu/apply/requirements/'],
-  '加州大学圣塔芭芭拉分校': ['7.0/80(4.0)', 'https://www.graddiv.ucsb.edu/admissions/application-and-admission-checklist'],
-  '俄亥俄州立大学': ['6.5/79(4.0)', 'https://gpadmissions.osu.edu/grad/admissions.html'],
-  '波士顿大学': ['7.0/100(5.0)', 'https://www.bu.edu/grad/admission-funding/graduate-admission/'],
-  '罗格斯大学新布朗斯维克分校': ['7.0/22+23+21+17', 'https://gradstudy.rutgers.edu/information/international-students', '官网按单项给分、无总分：写作 22 / 口语 23 / 阅读 21 / 听力 17；2026-01-22 起新制为 写作 4.5 / 口语 4.5 / 阅读 4 / 听力 4'],
-  '马里兰大学帕克分校': ['7.0/96(5.0)', 'https://gradschool.umd.edu/admissions/admissions-requirements'],
-  '华盛顿大学': ['6.5/80(4.0)', 'https://grad.uw.edu/prospective-students/how-to-apply/requirements/'],
-  '理海大学': ['6.5/81(4.0)', 'https://www2.lehigh.edu/admissions/english-proficiency-requirement-for-graduate-studies'],
-  '东北大学': ['6.5/79(4.0)', 'https://graduate.northeastern.edu/admissions-aid/how-to-apply/'],
+  '威斯康星大学麦迪逊分校': ['7.0/92(5.0)', 'https://info.grad.wisc.edu/requirements-for-admission'],
+  '加州大学圣塔芭芭拉分校': ['7.0/100(5)', 'https://engage.graddiv.ucsb.edu/portal/programs?cmd=prog&code=CMPSC-MS-0',
+    'CS 硕士项目页\n托福 2026-01-21 前 100、之后新制 5'],
+  '俄亥俄州立大学': ['6.5/79(4.0)', 'https://gpadmissions.osu.edu/intl/additional-requirements-to-apply.html'],
+  '波士顿大学': ['7.0/100(5.0)', 'https://www.bu.edu/sph/admissions/applying/english-language-proficiency-for-international-applicants/',
+    '无全校统一线；此为公共卫生学院线\n工学院为 90 / 4.5'],
+  '罗格斯大学新布朗斯维克分校': ['7.0/22+23+21+17', 'https://gradstudy.rutgers.edu/information/international-students', '写作 22 / 口语 23 / 阅读 21 / 听力 17\n2026-01-22 起新制 4.5/4.5/4/4'],
+  '马里兰大学帕克分校': ['7.0/96(5.0)', 'https://gradschool.umd.edu/admissions/english-language-proficiency-requirements'],
+  '华盛顿大学': ['6.5/80(4.0)', 'https://grad.uw.edu/prospective-students/how-to-apply/requirements/',
+    '左列为最低档；推荐 7.0 / 92(4.5)\n多邻国 125+ / MyBest 92+（达标档）'],
+  '理海大学': ['6.5/81(4.0)', 'https://www2.lehigh.edu/admissions/english-proficiency-requirement-for-graduate-studies',
+    '按学院分行，表内为工程学院线\n其他学院 94/5、90/5'],
+  '东北大学': ['6.5/90', 'https://www.khoury.northeastern.edu/apply/masters-apply/',
+    'Khoury 学院推荐分，非硬性最低线\n托福 90≥ / 雅思 6.5≥'],
   '普渡大学': ['6.5/80(4.0)', 'https://www.purdue.edu/academics/ogsps/admissions/how-to-apply/'],
   '佐治亚大学': ['6.5/80(4.5)', 'https://grad.uga.edu/admissions/requirements/international-applications/english-language-proficiency-requirement/'],
-  '罗切斯特大学': ['7.0/100(5.0)', 'https://www.rochester.edu/college/gradstudies/admissions/'],
+  '罗切斯特大学': ['7.0/100(5.0)', 'https://www.rochester.edu/college/gradstudies/admissions/test-requirements.html',
+    '无校级统一线，各系自定'],
   '凯斯西储大学': ['7.0/90(5.0)', 'https://case.edu/gradstudies/prospective-students/instructions-requirements'],
-  '佛罗里达州立大学': ['6.5/80(4.0)', 'https://gradschool.fsu.edu/admissions'],
+  '佛罗里达州立大学': ['6.5/80(4.0)', 'https://gradschool.fsu.edu/admissions/international-admissions'],
   '德州农工大学': ['6.0/80(4.5)', 'https://admissions.tamu.edu/apply/international/international-graduate.html'],
-  '弗吉尼亚理工学院': ['6.5/90(4.5)', 'https://graduateschool.vt.edu/admissions/how-to-apply.html'],
+  '弗吉尼亚理工学院': ['6.5/90(4.5)', 'https://graduateschool.vt.edu/admissions/how-to-apply/testing-requirements.html'],
   '维克森林大学': ['6.5/80(4.5)', 'https://graduate.wfu.edu/?p=393'],
   '加州大学默塞德分校': ['6.5/80', 'https://graduatedivision.ucmerced.edu/node/35'],
   '维拉诺瓦大学': ['6.5/4.0', 'https://www.villanova.edu/university/liberal-arts-sciences/graduate-studies/applying-to-villanova/international.html'],
   '乔治华盛顿大学': ['6.5/81', 'https://graduate.admissions.gwu.edu/international-student-application-requirements'],
   '宾夕法尼亚州立大学': ['6.5/80(4.5)', 'https://gradschool.psu.edu/graduate-admissions/how-to-apply/new-applicants/requirements-for-graduate-admission/'],
   '圣塔克拉拉大学': ['6.5/4.5', 'https://www.scu.edu/globalengagement/international-students/prospective-international-students/english-proficiency-requirement'],
-  '纽约州立大学石溪分校': ['6.5/80(4.5)', 'https://stonybrook.edu/commcms/grad/admissions/apply/graduate-programs.php'],
-  '明尼苏达大学双城分校': ['6.5/79(4.5)', 'https://grad.umn.edu/admissions/application-instructions'],
+  '纽约州立大学石溪分校': ['6.5/80(4.5)', 'https://stonybrook.edu/commcms/grad/admissions/apply/graduate-programs.php',
+    '硕士档；博士为 90 / 新制 5'],
+  '明尼苏达大学双城分校': ['6.5/79(4.5)', 'https://grad.umn.edu/admissions/application-instructions/international-student-resources/english-language-proficiency'],
+};
+
+/* 用户亲自逐条核过官网原文的学校：英语要求列、GRE 列只有这些用蓝色，其余保持灰色。
+   新确认一所，把校名加进来即可。 */
+const USER_OK = new Set(['东北大学', '加州大学圣塔芭芭拉分校', '佛罗里达大学', '加州大学戴维斯分校',
+  '加州大学圣地亚哥分校', '德克萨斯大学奥斯汀分校', '加州大学尔湾分校', '加州大学默塞德分校', '南加州大学',
+  '华盛顿大学']);
+
+/* 这一列回答的是「GRE 是不是硬性要求」，同时兼作跳转到该校院系项目页的入口。
+   键为校名，值 = [结论, 来源页 URL, 可选说明]；未列入的显示 —（尚未核实）。
+   true＝硬性要求；false＝不要求；'opt'＝可选（交不交都能申请，同样按「不硬性要求」显示）；
+   'dept'＝无论要求与否，这里只做院系项目页跳转，格子文字显示「院系」。
+   结论只在 USER_OK 的学校里显示为蓝色。 */
+const GRE = {
+  '加州大学圣塔芭芭拉分校': [false, 'https://engage.graddiv.ucsb.edu/portal/programs?cmd=prog&code=CMPSC-MS-0'],
+  '佛罗里达大学': ['opt', 'https://cise.ufl.edu/admissions/graduate/',
+    '可选。Verbal 期望 ≥140；\nGPA 多在 3.3/4.0 以上'],
+  '加州大学戴维斯分校': [false, 'https://grad.ucdavis.edu/program-application-deadlines',
+    '不要求，也不接收\nCS 硕博截止：12/15（* 兼奖学金）'],
+  '加州大学圣地亚哥分校': [false, 'https://mas-dse.ucsd.edu/admissions/index.html',
+    'MAS-DSE 项目：不要求，考过可自愿提交\n2027 秋：10/14 开放，5/28 截止，9/24 开学'],
+  '加州大学默塞德分校': [false, 'https://graduatedivision.ucmerced.edu/admissions/prospective-students/apply-now/requirements',
+    '多数项目不要求，仅政治学要求\nEECS 硕士列为可选提交'],
+  '东北大学': ['dept', 'https://www.khoury.northeastern.edu/apply/masters-apply/',
+    '跳转 Khoury 计算机学院硕士申请页\n（与左侧英语要求同一页）'],
+  '普渡大学': ['dept', 'https://www.purdue.edu/academics/ogsps/program-search/?degree=masters',
+    '跳转研究生项目检索页\n筛 Masters 找各系项目页'],
+  '华盛顿大学': [false, 'https://apply.grad.uw.edu/portal/prog_detail_find_a_program?progid=0-J-CSE%20M-00-25',
+    '官网原文 Not Considered：不要求也不看\n该页为 BS/MS 项目（限 UW 本科生）'],
 };
 
 const VIEW = {
   ov: {label:'按 U.S. News 2026 全美综合大学排名（附 CS 排名）', max:60,
-       head:['名次','学校','所在州','类型','CS','雅思/托福','对比 2025','搜索'],
-       w:['50px','236px','158px','62px','64px','140px','124px','96px'], min:920,
+       head:['名次','学校','所在州','类型','CS','雅思/托福','GRE','对比 2025','搜索'],
+       w:['50px','236px','158px','62px','64px','140px','64px','124px','96px'], min:994,
        presets:[[1,10],[11,30],[31,60]]},
   cs: {label:'按 U.S. News 2026 最佳研究生计算机科学排名（前 50，覆盖到第 46 名）', max:46,
-       head:['CS 名次','学校','所在州','类型','综合排名','雅思/托福','搜索'],
-       w:['50px','236px','158px','62px','146px','170px','108px'], min:920,
+       head:['CS 名次','学校','所在州','类型','综合排名','雅思/托福','GRE','搜索'],
+       w:['50px','236px','158px','62px','146px','170px','64px','108px'], min:994,
        presets:[[1,10],[11,30],[31,46]]}
 };
 let view = 'ov';
@@ -806,18 +876,18 @@ function overallText(rk){
 }
 
 /* 校名单元格：
-   · 综合排名 30 及以后 → 跳该校官网「研究生入学要求」页，带下划线 + ↗ 标记（表示这层信息）
-   · 综合排名前 30        → 跳该校官网首页，外观与纯文本完全一致（无下划线、无标记），只靠鼠标指针和悬停提示区分
+   · 综合排名第 20 名及以后 → 跳该校官网「研究生入学要求」页，带下划线 + ↗ 标记（表示这层信息）
+   · 综合排名前 19 名       → 跳该校官网首页，外观与纯文本完全一致（无下划线、无标记），只靠鼠标指针和悬停提示区分
    · 其余（无链接数据）    → 纯文本 */
 function nameCell(d){
   const cn = d[0], en = d[1], req = d[10], site = SITE[cn];
   let name;
   if (req){
     name = '<a class="schlink" href="' + req + '" target="_blank" rel="noopener noreferrer"'
-      + ' title="打开 ' + cn + ' 官网的研究生入学要求">' + cn + '</a>';
+      + ' title="' + cn + ' · 官网：\n研究生入学要求页">' + cn + '</a>';
   } else if (site){
     name = '<a class="schlink plain" href="' + site + '" target="_blank" rel="noopener noreferrer"'
-      + ' title="打开 ' + cn + ' 官网首页（' + site.replace(/^https:\/\//, '') + '）">' + cn + '</a>';
+      + ' title="' + cn + ' · 官网首页：\n' + site.replace(/^https:\/\//, '') + '">' + cn + '</a>';
   } else {
     name = '<span class="cn">' + cn + '</span>';
   }
@@ -838,22 +908,63 @@ function csCell(d){
 }
 
 /* 英语要求列：雅思 / 托福最低分，括号内为 2026-01-21 起 ETS 新 6 分制托福总分。
-   整格可点，跳该校官网英语要求 / 研究生入学要求页；未核实的显示 — */
+   整格可点，跳该校官网原文；未核实的显示 —。
+   悬浮提示只两三层：第一行「校名 · 英语：」，下面是要点，按 \n 分段（title 里会渲染成换行）。
+   有第三个字段就整段用它（可自带 \n，写「CISE 系：…」这类前缀），否则用「雅思 x / 托福 y」。
+   颜色：USER_OK 里的学校（用户核过原文）走 .v 蓝色，其余灰色。 */
 function engCell(d){
   const cn = d[0], e = ENG[cn];
-  if (!e) return '<span class="eng off" title="' + cn + '：尚未核实其研究生英语入学最低分">—</span>';
+  if (!e) return '<span class="eng off" title="' + cn + ' · 英语：\n尚未核实最低分">—</span>';
   const sc = e[0], i = sc.indexOf('(');
   const main = i < 0 ? sc : sc.slice(0, i);
   const tail = i < 0 ? '' : '<span class="new">' + sc.slice(i) + '</span>';
   const url = e[1] || d[10];
-  /* 没带括号时判断官网挂的是哪一套：托福新制是 0–6 分，旧制是 0–120 分。
-     罗格斯那种「四项之和」的形式（22+23+21+17）由 e[2] 自行说明，不走这里。 */
-  const t = parseFloat(main.split('/')[1]);
-  const kind = i >= 0 ? '官网新旧两套并列' : (t <= 6 ? '官网只挂新 6 分制' : '官网只挂旧 0–120 分制');
-  const tip = cn + ' 研究生英语最低要求：雅思 / 托福 ' + sc + '（' + (e[2] || kind) + '，点击查看官网原文）';
-  if (!url) return '<span class="eng off" title="' + tip + '">' + main + tail + '</span>';
-  return '<a class="eng" href="' + url + '" target="_blank" rel="noopener noreferrer" title="' + tip + '">'
-    + main + tail + '</a>';
+  /* 官网只印了某一套分制时补一句：这种格子光看分数会以为数据缺了一块。
+     罗格斯那种「四项之和」（22+23+21+17）由 e[2] 自己说明，不走这里。 */
+  const only = (i >= 0 || sc.indexOf('/') < 0) ? ''
+    : (parseFloat(main.split('/')[1]) <= 6 ? '只挂新 6 分制' : '只挂旧 0–120 制');
+  const tip = cn + ' · 英语：\n' + (e[2] || [ieltsToefl(sc), only].filter(Boolean).join('\n'));
+  const more = noteI(cn + ' · 英语', e[2] || only);
+  if (!url) return '<span class="eng off" title="' + tip + '">' + main + tail + '</span>' + more;
+  return '<a class="eng' + (USER_OK.has(cn) ? ' v' : '') + '" href="' + url + '" target="_blank" rel="noopener noreferrer" title="' + tip + '">'
+    + main + tail + '</a>' + more;
+}
+
+/* 触屏上悬停用不了：只有带备注（第三个字段）或「只挂某套分制」的格子才在数字后补一个 ⓘ，
+   点开在该行下方铺一行小字，内容和悬停提示一致。指针设备上 CSS 直接把它藏掉。 */
+function noteI(head, note){
+  if (!note) return '';
+  return '<button class="note-i" type="button" aria-expanded="false" aria-label="查看备注"'
+    + ' data-head="' + escAttr(head) + '" data-note="' + escAttr(note) + '">ⓘ</button>';
+}
+
+/* 只用于拼 HTML 属性：& 必须先换，否则会把后面换出来的 &quot; 再转一次 */
+function escAttr(s){
+  return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/* 「雅思/托福」这种写法拆成人话；没有斜杠的（如「各系自定」）原样返回 */
+function ieltsToefl(sc){
+  const j = sc.indexOf('/');
+  return j < 0 ? sc : '雅思 ' + sc.slice(0, j) + ' / 托福 ' + sc.slice(j + 1);
+}
+
+/* GRE 列：只看「是不是硬性要求」——✅ 要求 / ❌ 不要求（可选的也归这里）/ 院系 跳项目页 / — 尚未核实。
+   悬浮提示同样是「校名 · GRE：」+ 要点，有第三个字段就用它（自带 \n 分段）。
+   颜色规则同英语要求列（见 USER_OK） */
+function greCell(d){
+  const cn = d[0], g = GRE[cn];
+  if (!g) return '<span class="gre off" title="' + cn + ' · GRE：\n尚未核实是否要求">—</span>';
+  const s = g[0], dept = s === 'dept';
+  const txt = dept ? '院系' : (s === true ? '✅' : '❌');
+  const say = dept ? '跳转该校园系项目页'
+    : (s === true ? '硬性要求' : (s === 'opt' ? '非硬性要求（可选提交）' : '不要求'));
+  const tip = cn + (dept ? ' · 院系：\n' : ' · GRE：\n') + (g[2] || say);
+  const more = noteI(cn + (dept ? ' · 院系' : ' · GRE'), g[2]);
+  if (!g[1]) return '<span class="gre' + (USER_OK.has(cn) ? ' v' : '') + '" title="' + tip + '">' + txt + '</span>' + more;
+  return '<a class="gre' + (USER_OK.has(cn) ? ' v' : '') + '" href="' + g[1] + '" target="_blank" rel="noopener noreferrer" title="' + tip + '">'
+    + txt + '</a>' + more;
 }
 
 /* 综合视图末列：对比 2025 */
@@ -907,8 +1018,8 @@ function paint(){
       + '<td><button class="stlink" data-i="' + i + '" title="在地图上查看所在州">' + st + '</button></td>'
       + '<td><span class="tag ' + cls + '">' + label + '</span></td>'
       + (view === 'ov'
-          ? '<td>' + csCell(d) + '</td><td>' + engCell(d) + '</td><td>' + trendCell(d) + '</td>'
-          : '<td>' + overallCell(d) + '</td><td>' + engCell(d) + '</td>')
+          ? '<td>' + csCell(d) + '</td><td>' + engCell(d) + '</td><td>' + greCell(d) + '</td><td>' + trendCell(d) + '</td>'
+          : '<td>' + overallCell(d) + '</td><td>' + engCell(d) + '</td><td>' + greCell(d) + '</td>')
       + '<td><a class="bing" href="' + bingURL(cn, en) + '" target="_blank" rel="noopener noreferrer" title="在 Bing 搜索 ' + cn + '">Bing ↗</a></td>'
       + '</tr>';
   });
@@ -1109,12 +1220,53 @@ document.addEventListener('pointerdown', e => {
   if (a) warmOrigin(a.getAttribute('href'));
 }, { capture: true, passive: true });
 
+/* ---------- 触屏上的备注条（对应 CSS 里的 .note-i / tr.noterow） ---------- */
+/* 点 ⓘ 在该行下方插一条跨满整行的小字，再点收起；同时只留一条，
+   否则连点几行会把表撑得很长。表格重绘（切榜、筛选）时备注条自然消失。 */
+function closeNotes(){
+  document.querySelectorAll('tr.noterow').forEach(r => r.remove());
+  document.querySelectorAll('.note-i.on').forEach(b => {
+    b.classList.remove('on');
+    b.setAttribute('aria-expanded', 'false');
+  });
+}
+document.addEventListener('click', e => {
+  const t = e.target;
+  const btn = t && t.closest ? t.closest('.note-i') : null;
+  if (!btn) return;
+  const wasOpen = btn.classList.contains('on');
+  closeNotes();
+  if (wasOpen) return;
+  const tr = btn.closest('tr');
+  if (!tr) return;
+  const row = document.createElement('tr');
+  row.className = 'noterow';
+  const td = document.createElement('td');
+  td.colSpan = tr.children.length;
+  const box = document.createElement('span');
+  box.className = 'cnb';
+  const head = document.createElement('b');
+  head.textContent = btn.dataset.head;
+  box.appendChild(head);
+  box.appendChild(document.createTextNode('：'));
+  box.appendChild(document.createElement('br'));
+  btn.dataset.note.split('\n').forEach((line, i) => {
+    if (i) box.appendChild(document.createElement('br'));
+    box.appendChild(document.createTextNode(line));
+  });
+  td.appendChild(box);
+  row.appendChild(td);
+  tr.after(row);
+  btn.classList.add('on');
+  btn.setAttribute('aria-expanded', 'true');
+}, { passive: true });
+
 /* 按下后到新页面出现之间给一个明确状态，避免「点了没反应」的错觉。
    1.6 秒后自动复位，这样从新标签页返回时不会残留成一直转的样子。 */
 let _busyTimer = 0;
 document.addEventListener('click', e => {
   const t = e.target;
-  const a = t && t.closest ? t.closest('a.schlink, a.eng, a.bing') : null;
+  const a = t && t.closest ? t.closest('a.schlink, a.eng, a.gre, a.bing') : null;
   if (!a || a.target !== '_blank') return;
   a.classList.add('is-loading');
   clearTimeout(_busyTimer);
