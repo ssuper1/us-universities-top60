@@ -21,7 +21,7 @@
   body{margin:0;background:var(--bg);color:var(--t1);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
     font-size:14px;line-height:1.65;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:980px;margin:0 auto;padding:40px 24px 72px}
+  .wrap{max-width:1036px;margin:0 auto;padding:40px 24px 72px}
   h1{font-size:24px;font-weight:600;margin:0 0 6px;letter-spacing:-.2px}
   .hrow{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 0 6px}
   .hrow h1{margin:0}
@@ -129,10 +129,36 @@
   .csrk{font-variant-numeric:tabular-nums;cursor:help}
   .csrk.top{font-weight:600;color:var(--blue-tx)}
   .csrk.off{color:var(--t3)}
-  /* 英语要求列：雅思 / 托福（括号内为 2026-01-21 起 ETS 新 6 分制托福分） */
-  .eng{color:var(--blue-tx);text-decoration:none;white-space:nowrap;cursor:pointer;
-    font-variant-numeric:tabular-nums;border-bottom:1px solid rgba(24,95,165,.35)}
-  .eng:hover{border-bottom-color:var(--blue-tx)}
+  /* 英语要求列：雅思 / 托福（括号内为 2026-01-21 起 ETS 新 6 分制托福分）。
+     默认灰色＝整理自官网但未经逐条确认；只有 .v（用户亲自核过原文，见脚本里的 USER_OK）回到蓝色。 */
+  .eng{color:var(--t2);text-decoration:none;white-space:nowrap;cursor:pointer;
+    font-variant-numeric:tabular-nums;border-bottom:1px solid var(--line)}
+  .eng:hover{border-bottom-color:var(--t2)}
+  .eng.v{color:var(--blue-tx);border-bottom-color:rgba(24,95,165,.35)}
+  .eng.v:hover{border-bottom-color:var(--blue-tx)}
+  /* GRE 列：✅ 硬性要求 / ❌ 不要求（「可选」也归这里）/ 院系 跳项目页 / — 未核实（只放符号或最少的字，结论见悬停提示）。灰蓝规则同英语要求列 */
+  .gre{color:var(--t2);text-decoration:none;white-space:nowrap;cursor:pointer;font-variant-numeric:tabular-nums}
+  .gre:hover{color:var(--blue-tx)}
+  .gre::after{content:"↗";font-size:10px;margin-left:2px;vertical-align:1px;opacity:.5}
+  .gre:hover::after{opacity:1}
+  .gre.off{color:var(--t3);cursor:default}
+  .gre.off::after{display:none}
+  .gre.v{color:var(--blue-tx)}
+  /* 触屏没有鼠标悬停：带备注的格子（见脚本里的 noteI）在数字后多一个 ⓘ，点开在该行下方铺一行小字。
+     指针设备上这个按钮不出现，仍走 title 悬停。 */
+  .note-i{display:none}
+  @media (hover:none),(pointer:coarse){
+    .note-i{display:inline-block;margin-left:1px;margin-top:-10px;margin-bottom:-10px;
+      padding:12px 7px;border:0;background:none;
+      font:inherit;font-size:11px;line-height:1;color:var(--t3);cursor:pointer;vertical-align:1px}
+    .note-i.on{color:var(--blue-tx)}
+  }
+  /* 备注条：跨满整行，但表格本身是横向滚动的，所以文字用 sticky 钉在可视区左边缘——
+     滑到哪一列点开都读得到，不用再滑回左边 */
+  tr.noterow td{padding:6px 9px 9px;background:#fafaf8}
+  tr.noterow .cnb{position:sticky;left:6px;display:inline-block;max-width:calc(100vw - 40px);
+    white-space:normal;color:var(--t2);font-size:12px;line-height:1.6}
+  tr.noterow .cnb b{color:var(--t1);font-weight:500}
   .eng::after{content:"↗";font-size:10px;margin-left:2px;vertical-align:1px;opacity:.5}
   .eng:hover::after{opacity:1}
   .eng .new{color:var(--t3);font-size:11.5px;margin-left:1px}
@@ -144,6 +170,7 @@
      真机两者都成立，写两个条件更稳。 */
   @media (pointer:coarse), (hover:none){
     .tbl-scroll .eng{margin:-9px -4px;padding:9px 4px}
+  .tbl-scroll .gre{margin:-9px -4px;padding:9px 6px}
     .tbl-scroll .bing{margin:-4px -3px;padding:9px 12px}
   }
   /* 触屏设备上压掉表格里密集元素的长提示。
@@ -214,7 +241,7 @@
   .ovi{font-size:13px;color:var(--t2);text-align:center;padding:60px 0}
   /* 回到顶部：小圆钮，宽屏时落在正文栏右侧空白处，窄屏贴边 */
   #totop{position:fixed;z-index:50;
-    right:max(14px,calc((100vw - 980px) / 2 - 48px));
+    right:max(14px,calc((100vw - 1036px) / 2 - 48px));
     bottom:20px;width:34px;height:34px;padding:0;
     display:flex;align-items:center;justify-content:center;
     border:.5px solid var(--line);border-radius:50%;
@@ -271,12 +298,13 @@
 
   /* ---------- 外链点击手感 ---------- */
   /* touch-action:manipulation 关掉移动端「双击缩放」的等待判定，iOS 上点击可省约 300ms */
-  .schlink,.eng,.bing,.stlink{touch-action:manipulation}
+  .schlink,.eng,.gre,.bing,.stlink{touch-action:manipulation}
   /* 手指按下的那一瞬间就有反馈，不用干等新页面开始加载 */
-  .schlink:active,.eng:active,.bing:active{background:var(--blue-bg);border-radius:3px}
+  .schlink:active,.eng:active,.gre:active,.bing:active{background:var(--blue-bg);border-radius:3px}
   /* 已触发跳转、但目标页还没出现：把 ↗ 换成一闪一闪的省略号，明确「点到了、正在开」 */
   .schlink.is-loading::after{content:"…";font-size:12px;font-weight:600;opacity:1;animation:ldblink .7s steps(1,end) infinite}
   .eng.is-loading::after{content:"…";font-size:12px;font-weight:600;opacity:1;animation:ldblink .7s steps(1,end) infinite}
+  .gre.is-loading::after{content:"…";font-size:12px;font-weight:600;opacity:1;animation:ldblink .7s steps(1,end) infinite}
   .bing.is-loading::after{content:"…";animation:ldblink .7s steps(1,end) infinite}
   @keyframes ldblink{0%,55%{opacity:1}55.01%,100%{opacity:.2}}
 
@@ -391,7 +419,7 @@
     </button>
     <div class="engmore" id="engmore" hidden></div>
   </div>
-  <p class="hint" style="margin:10px 2px 0">上方可按<strong>当前榜的名次</strong>筛选：拖动<strong>「名次滑轨」</strong>的两个手柄（每 10 名吸附一档；两边留空＝不限），或点它右边的 1–10 / 11–30 / 31–60 快捷区间。点「所在州」在地图上定位，点「Bing」开新标签页搜索，点<strong>校名</strong>跳官网——<strong>综合排名第 20 名之前</strong>跳官网首页（外观与正文一样、不带下划线），<strong>第 20 名及以后</strong>跳该校研究生入学要求页（带下划线 + ↗ 标记）；点「雅思/托福」那一格里的分数，跳到该校官网原文。</p>
+  <p class="hint" style="margin:10px 2px 0">上方可按<strong>当前榜的名次</strong>筛选：拖动<strong>「名次滑轨」</strong>的两个手柄（每 10 名吸附一档；两边留空＝不限），或点它右边的 1–10 / 11–30 / 31–60 快捷区间。点「所在州」在地图上定位，点「Bing」开新标签页搜索，点<strong>校名</strong>跳官网——<strong>综合排名第 20 名之前</strong>跳官网首页（外观与正文一样、不带下划线），<strong>第 20 名及以后</strong>跳该校研究生入学要求页（带下划线 + ↗ 标记）；点「雅思/托福」那一格里的分数、或「GRE」那一格的结论，跳到该校官网原文。两列都用颜色区分来源：<strong>蓝色＝已人工逐条核对过官网原文，灰色＝由公开资料整理、尚未核对</strong>。<strong>手机上没有鼠标悬停</strong>，所以「雅思/托福」和「GRE」两列里<strong>带备注的格子会在数值后多一个 ⓘ</strong>：点它在该行下方铺出一条小字（内容与电脑上悬停看到的一样），再点收起；不带 ⓘ 的格子说明悬停里没有额外信息。电脑上不显示 ⓘ，仍然用鼠标悬停。</p>
 
   <button class="ddtoggle" id="ddtoggle" type="button" aria-expanded="false" aria-controls="ddbody">
     <span class="ddar" aria-hidden="true">▸</span>
@@ -410,6 +438,7 @@
       <li><strong>美国研究生院普遍是「双重门槛」</strong>：研究生院（Graduate School）定全校最低线，各系/项目再定更高的线。你在官网上看到的「最低要求」通常只是"够资格被受理"，实际录取线更高。比如 UF 全校最低 3.0，但很多系要求 3.5+。</li>
       <li><strong>最低 GPA 常见写法是 3.0 / 4.0</strong>（UW、UT Austin、UF、UMD、Minnesota 均是），少数校写 2.75（理海）；另有不少校按「最后 60 学分 / 高年级课程」单独计算 GPA，比四年总 GPA 更容易达标——这对大三才发力的人有利。</li>
       <li><strong>语言线各校不同</strong>：常见是托福 80–90 / 雅思 6.5–7.0，个别项目更高。表中<strong>「雅思/托福」列</strong>是各校研究生院的最低线，<strong>只照抄官网印出来的那一套，不替学校补历史分值</strong>：新旧两套并列的写「雅思/旧制(新制)」，如 <em>6.5/80(4.5)</em>；官网只挂新 6 分制的直接写 <em>7.0/4.5</em>（如 UC 戴维斯、UF、维拉诺瓦、圣塔克拉拉）；只挂旧制的写 <em>6.5/81</em>（如乔治华盛顿、UC 默塞德）；罗格斯官网按单项给分、不公布总分，这里取它新 6 分制里最高的写作项，写成 <em>7.0/4.5</em>（悬停可看听说读写四项的完整分值）。<strong>点分数跳到该校官网原文</strong>，鼠标悬停会说明该校公布的是哪一套。本列覆盖综合排名 20–59 的 43 所，全部于 2026-09-13 逐校核对官网原文；其中卡内基梅隆、埃默里官网写明语言要求<strong>由各系自定</strong>，威廉与玛丽未公布统一最低线，这三所显示文字而不是分数。</li>
+      <li><strong>「GRE」列</strong>：只看研究生申请是否需要 <strong>GRE 普通考试（General Test）</strong>，专项考试不在本列范围。<strong>判定口径是「硬性要求」</strong>：显示 <strong>✅ 硬性要求 / ❌ 不要求（官网写 optional、可自愿提交的也归这一格）/ 院系 / — 尚未核实</strong>；「院系」表示这一格不做判定，只用来<strong>跳转到该校园系项目页</strong>（目前是东北大学 → Khoury 计算机学院硕士申请页、普渡大学 → 研究生项目检索页）。目前逐个核过官网原文的有六所：加州大学圣塔芭芭拉分校（Engage 系统的 CS 硕士项目页写明<strong>不需要</strong>，托福/雅思分同样取自该页）、佛罗里达大学（CISE 系招生页写明 general GRE 是 <strong>optional</strong>、Verbal 期望至少 140；同页写明录取者本科 GPA 多在 3.3/4.0 以上，但那是录取者常见水平、不是官网写的硬性最低线，研究生院层面只写 B）、加州大学戴维斯分校（<strong>截止日期表</strong>里 CS 硕士 / 博士那一行写「GRE not required or accepted」，即<strong>不要求也不接收</strong>）、加州大学圣地亚哥分校（MAS-DSE 项目页写明<strong>不要求</strong>，考过可自愿提交）、加州大学默塞德分校（<strong>按项目列名单</strong>：只有政治学要求，EECS 硕士等列为可选，<strong>不在名单上的项目一律无需提交</strong>）、华盛顿大学（项目页写 <strong>GRE Requirement: Not Considered</strong>，即不要求、交了也不看；但要留意那一页是 <strong>BS/MS</strong> 项目页、只收 UW 本校本科生，Allen School 的博士申请页已不再提 GRE）。其余显示 <em>—</em> 表示<strong>尚未核实，不是「不要求」</strong>——例如 UT 奥斯汀，研究生院页写「Most programs require the GRE or GMAT，具体问项目」，而 CS 系申请页写「GRE General Score (optional for Fall 2025)」，两处口径不一致且系页那行还停在 2025 年，就没有落成结论。与语言线一样，蓝色＝已确认到原文，灰色＝尚未确认。</li>
       <li><strong>ETS 从 2026-01-21 起换了托福计分方式</strong>：旧制 0–120 分，新制总分 0–6 分；2026 年 1 月 21 日及以后参加的考试按新制（旧分制 2028 年 1 月才正式退场）。大多数学校如今在官网上新旧并列（上表括号内的就是新制），少数学校只挂了一整套——只挂新制的有 UC 戴维斯、UF、维拉诺瓦、圣塔克拉拉，只挂旧制的有 UC 默塞德、乔治华盛顿。<strong>「只挂一套」不等于另一套不被接受，而是官网还没更新；本列按官网现状照抄，不替你换算或补值。申请前务必按自己的考试日期对照官网原文。</strong></li>
       <li><strong>校名没有链接的两种情况</strong>：一种是综合排名第 20 名之前（本次按你的要求做到第 20 名）；另一种是官网没有集中写「研究生最低要求」的独立页面（例如圣塔克拉拉是各学院分别招生，这里给的是官方研究生项目总入口）。</li>
       <li><strong>页面会变</strong>：招生要求每年更新，申请前请以官网当年页面为准；若链接失效，用「Bing」列搜该校即可。</li>
@@ -680,15 +709,45 @@ const ENG_ALT = {
   '乔治华盛顿大学': '该校招生站整站被 Cloudflare 拦截，域名有效但页面无法验证，点入前请留意',
 };
 
+/* 用户亲自逐条核过官网原文的学校：英语要求列、GRE 列只有这些用蓝色，其余保持灰色。
+   新确认一所，把校名加进来即可。 */
+const USER_OK = new Set(['东北大学', '加州大学圣塔芭芭拉分校', '佛罗里达大学', '加州大学戴维斯分校',
+  '加州大学圣地亚哥分校', '德克萨斯大学奥斯汀分校', '加州大学尔湾分校', '加州大学默塞德分校', '南加州大学',
+  '华盛顿大学']);
+
+/* 这一列回答的是「GRE 是不是硬性要求」，同时兼作跳转到该校院系项目页的入口。
+   键为校名，值 = [结论, 来源页 URL, 可选说明]；未列入的显示 —（尚未核实）。
+   true＝硬性要求；false＝不要求；'opt'＝可选（交不交都能申请，同样按「不硬性要求」显示）；
+   'dept'＝无论要求与否，这里只做院系项目页跳转，格子文字显示「院系」。
+   结论只在 USER_OK 的学校里显示为蓝色。 */
+const GRE = {
+  '加州大学圣塔芭芭拉分校': [false, 'https://engage.graddiv.ucsb.edu/portal/programs?cmd=prog&code=CMPSC-MS-0'],
+  '佛罗里达大学': ['opt', 'https://cise.ufl.edu/admissions/graduate/',
+    '可选。Verbal 期望 ≥140；\nGPA 多在 3.3/4.0 以上'],
+  '加州大学戴维斯分校': [false, 'https://grad.ucdavis.edu/program-application-deadlines',
+    '不要求，也不接收\nCS 硕博截止：12/15（* 兼奖学金）'],
+  '加州大学圣地亚哥分校': [false, 'https://mas-dse.ucsd.edu/admissions/index.html',
+    'MAS-DSE 项目：不要求，考过可自愿提交\n2027 秋：10/14 开放，5/28 截止，9/24 开学'],
+  '加州大学默塞德分校': [false, 'https://graduatedivision.ucmerced.edu/admissions/prospective-students/apply-now/requirements',
+    '多数项目不要求，仅政治学要求\nEECS 硕士列为可选提交'],
+  '东北大学': ['dept', 'https://www.khoury.northeastern.edu/apply/masters-apply/',
+    '跳转 Khoury 计算机学院硕士申请页\n（与左侧英语要求同一页）'],
+  '普渡大学': ['dept', 'https://www.purdue.edu/academics/ogsps/program-search/?degree=masters',
+    '跳转研究生项目检索页\n筛 Masters 找各系项目页'],
+  '华盛顿大学': [false, 'https://apply.grad.uw.edu/portal/prog_detail_find_a_program?progid=0-J-CSE%20M-00-25',
+    '官网原文 Not Considered：不要求也不看\n该页为 BS/MS 项目（限 UW 本科生）'],
+};
+
 const VIEW = {
   ov: {label:'按 U.S. News 2026 全美综合大学排名（附 CS 排名）', max:60,
-       head:['名次','学校','所在州','类型','CS','雅思/托福','搜索'],
-       /* 「对比 2025」列已按要求删除（2026-09-23）；原先那 124px 分给雅思/托福 与 搜索 */
-       w:['50px','236px','158px','62px','64px','178px','182px'], min:920,
+       head:['名次','学校','所在州','类型','CS','雅思/托福','GRE','搜索'],
+       /* 「对比 2025」列已按要求删除（2026-09-23）；GRE 列 56px 于同日恢复。
+          8 列合计 986px ＝ .wrap 内容宽（1036 − 48 padding），刚好铺满、不横向滚动 */
+       w:['50px','236px','158px','62px','64px','178px','56px','182px'], min:986,
        presets:[[1,10],[11,30],[31,60]]},
   cs: {label:'按 U.S. News 2026 最佳研究生计算机科学排名（前 50，覆盖到第 46 名）', max:46,
-       head:['CS 名次','学校','所在州','类型','综合排名','雅思/托福','搜索'],
-       w:['50px','236px','158px','62px','146px','170px','108px'], min:920,
+       head:['CS 名次','学校','所在州','类型','综合排名','雅思/托福','GRE','搜索'],
+       w:['50px','236px','158px','62px','146px','170px','56px','108px'], min:986,
        presets:[[1,10],[11,30],[31,46]]}
 };
 let view = 'ov';
@@ -903,24 +962,65 @@ function csCell(d){
    整格可点，跳该校官网英语要求 / 研究生入学要求页；未核实的显示 — */
 function engCell(d){
   const cn = d[0], e = ENG[cn];
-  if (!e) return '<span class="eng off" title="' + cn + '：尚未核实其研究生英语入学最低分">—</span>';
+  if (!e) return '<span class="eng off" data-cn="' + cn + '" title="' + cn + ' · 英语：\n尚未核实其研究生英语入学最低分">—</span>';
   const sc = e[0], i = sc.indexOf('(');
   const main = i < 0 ? sc : sc.slice(0, i);
   const tail = i < 0 ? '' : '<span class="new">' + sc.slice(i) + '</span>';
   const url = e[1] || d[10];
-  /* 没带括号时判断官网挂的是哪一套：托福新制是 0–6 分，旧制是 0–120 分。
-     罗格斯按单项给分、不公布总分，这里取它新 6 分制的写作项 4.5，细节写在 e[2]。 */
-  const t = parseFloat(main.split('/')[1]);
-  const kind = i >= 0 ? '官网新旧两套并列' : (t <= 6 ? '官网只挂新 6 分制' : '官网只挂旧 0–120 分制');
-  /* 手机端此前把整段说明塞在 title 里，一按住就被浏览器画成一条长横幅，挡住表格又关不掉。
-     现在只留一句短的（≤30 字，横幅不再遮挡），完整说明改由下面 engDesc() 拼进 #engmore，
-     由「ⓘ 分数怎么读」按钮控制展开——既能自己关，也不占表格宽度。 */
-  const tip = '雅思 / 托福 ' + sc + ' · 点开官网原文';
-  if (!url) return '<span class="eng off" data-cn="' + cn + '">' + main + tail + '</span>';
-  /* data-cn 让校名不依赖 title 传递：手机上 title 会被移除（躲开系统横幅），
-     测试与脚本仍能靠这个属性把格子与学校对上。 */
-  return '<a class="eng" data-cn="' + cn + '" href="' + url + '" target="_blank" rel="noopener noreferrer" title="' + tip + '">'
-    + main + tail + '</a>';
+  /* 官网只印了某一套分制时补一句：这种格子光看分数会以为数据缺了一块。
+     托福新制 0–6 分、旧制 0–120 分；罗格斯那种「四项之和」由 e[2] 自己说明，不走这里。 */
+  const only = (i >= 0 || sc.indexOf('/') < 0) ? ''
+    : (parseFloat(main.split('/')[1]) <= 6 ? '只挂新 6 分制' : '只挂旧 0–120 制');
+  /* 电脑上悬停要能一眼分清「哪个学校、这套分什么意思、官方只挂哪一套」，
+     所以 title 里带校名 + 完整释义（e[2] 优先，否则「雅思 x / 托福 y」+ only）。
+     手机上 title 会被系统画成一条关不掉的长横幅——但触屏下 stripTitlesOnTouch() 会把
+     title 整个搬到 data-tip 并移除该属性，悬停改用行下方的 ⓘ 备注条，所以这里可以放心写全。 */
+  const tip = cn + ' · 英语：\n' + (e[2] || [ieltsToefl(sc), only].filter(Boolean).join('\n'));
+  /* data-cn 让校名不依赖 title 传递：手机上 title 会被移除，测试与脚本仍能靠这个属性对上学校。 */
+  const cls = 'eng' + (USER_OK.has(cn) ? ' v' : '');
+  /* 触屏上悬停用不了：把完整释义（或「只挂某套分制」）交给 ⓘ 按钮，点开在该行下方铺一行小字。
+     指针设备上 CSS 把 ⓘ 藏掉，仍走 title 悬停。 */
+  const more = noteI(cn + ' · 英语', e[2] || only);
+  if (!url) return '<span class="' + cls + ' off" data-cn="' + cn + '">' + main + tail + '</span>' + more;
+  return '<a class="' + cls + '" data-cn="' + cn + '" href="' + url + '" target="_blank" rel="noopener noreferrer" title="' + tip + '">'
+    + main + tail + '</a>' + more;
+}
+
+/* 触屏上悬停用不了：只有带备注（ENG 的第三个字段）的格子才在数值后补一个 ⓘ，
+   点开在该行下方铺一行小字，内容和电脑上悬停提示一致。指针设备上 CSS 直接把它藏掉。 */
+function noteI(head, note){
+  if (!note) return '';
+  return '<button class="note-i" type="button" aria-expanded="false" aria-label="查看备注"'
+    + ' data-head="' + escAttr(head) + '" data-note="' + escAttr(note) + '">ⓘ</button>';
+}
+
+/* 只用于拼 HTML 属性：& 必须先换，否则会把后面换出来的 &quot; 再转一次 */
+function escAttr(s){
+  return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/* 「雅思/托福」这种写法拆成人话；没有斜杠的（如「各系自定」）原样返回 */
+function ieltsToefl(sc){
+  const j = sc.indexOf('/');
+  return j < 0 ? sc : '雅思 ' + sc.slice(0, j) + ' / 托福 ' + sc.slice(j + 1);
+}
+
+/* GRE 列：只看「是不是硬性要求」——✅ 要求 / ❌ 不要求（可选的也归这里）/ 院系 跳项目页 / — 尚未核实。
+   有第三个字段（说明）的会在触屏上多一个 ⓘ。颜色规则同英语要求列（见 USER_OK）。 */
+function greCell(d){
+  const cn = d[0], g = GRE[cn];
+  if (!g) return '<span class="gre off" data-cn="' + cn + '" title="' + cn + ' · GRE：\n尚未核实是否要求">—</span>';
+  const s2 = g[0], dept = s2 === 'dept';
+  const txt = dept ? '院系' : (s2 === true ? '✅' : '❌');
+  const say = dept ? '跳转该校园系项目页'
+    : (s2 === true ? '硬性要求' : (s2 === 'opt' ? '非硬性要求（可选提交）' : '不要求'));
+  const tip = cn + (dept ? ' · 院系：\n' : ' · GRE：\n') + (g[2] || say);
+  const more = noteI(cn + (dept ? ' · 院系' : ' · GRE'), g[2]);
+  const cls = 'gre' + (USER_OK.has(cn) ? ' v' : '');
+  if (!g[1]) return '<span class="' + cls + '" data-cn="' + cn + '" title="' + tip + '">' + txt + '</span>' + more;
+  return '<a class="' + cls + '" data-cn="' + cn + '" href="' + g[1] + '" target="_blank" rel="noopener noreferrer" title="' + tip + '">'
+    + txt + '</a>' + more;
 }
 
 /* 「ⓘ 分数怎么读」展开区要用的完整说明：把 43 条里每所学校的英语要求 +
@@ -1021,8 +1121,8 @@ function paint(){
       + '<td><button class="stlink" data-i="' + i + '" title="在地图上查看所在州">' + st + '</button></td>'
       + '<td><span class="tag ' + cls + '">' + label + '</span></td>'
       + (view === 'ov'
-          ? '<td>' + csCell(d) + '</td><td>' + engCell(d) + '</td>'
-          : '<td>' + overallCell(d) + '</td><td>' + engCell(d) + '</td>')
+          ? '<td>' + csCell(d) + '</td><td>' + engCell(d) + '</td><td>' + greCell(d) + '</td>'
+          : '<td>' + overallCell(d) + '</td><td>' + engCell(d) + '</td><td>' + greCell(d) + '</td>')
       + '<td><a class="bing" href="' + bingURL(cn, en) + '" target="_blank" rel="noopener noreferrer" title="在 Bing 搜索 ' + cn + '">Bing ↗</a></td>'
       + '</tr>';
   });
@@ -1251,12 +1351,53 @@ document.addEventListener('click', e => {
   _tapFrom = null;
 }, { capture: true });
 
+/* ---------- 触屏上的备注条（对应 CSS 里的 .note-i / tr.noterow） ---------- */
+/* 点 ⓘ 在该行下方插一条跨满整行的小字，再点收起；同时只留一条，
+   否则连点几行会把表撑得很长。表格重绘（切榜、筛选）时备注条自然消失。 */
+function closeNotes(){
+  document.querySelectorAll('tr.noterow').forEach(r => r.remove());
+  document.querySelectorAll('.note-i.on').forEach(b => {
+    b.classList.remove('on');
+    b.setAttribute('aria-expanded', 'false');
+  });
+}
+document.addEventListener('click', e => {
+  const t = e.target;
+  const btn = t && t.closest ? t.closest('.note-i') : null;
+  if (!btn) return;
+  const wasOpen = btn.classList.contains('on');
+  closeNotes();
+  if (wasOpen) return;
+  const tr = btn.closest('tr');
+  if (!tr) return;
+  const row = document.createElement('tr');
+  row.className = 'noterow';
+  const td = document.createElement('td');
+  td.colSpan = tr.children.length;
+  const box = document.createElement('span');
+  box.className = 'cnb';
+  const head = document.createElement('b');
+  head.textContent = btn.dataset.head;
+  box.appendChild(head);
+  box.appendChild(document.createTextNode('：'));
+  box.appendChild(document.createElement('br'));
+  btn.dataset.note.split('\n').forEach((line, i) => {
+    if (i) box.appendChild(document.createElement('br'));
+    box.appendChild(document.createTextNode(line));
+  });
+  td.appendChild(box);
+  row.appendChild(td);
+  tr.after(row);
+  btn.classList.add('on');
+  btn.setAttribute('aria-expanded', 'true');
+}, { passive: true });
+
 /* 按下后到新页面出现之间给一个明确状态，避免「点了没反应」的错觉。
    1.6 秒后自动复位，这样从新标签页返回时不会残留成一直转的样子。 */
 let _busyTimer = 0;
 document.addEventListener('click', e => {
   const t = e.target;
-  const a = t && t.closest ? t.closest('a.schlink, a.eng, a.bing') : null;
+  const a = t && t.closest ? t.closest('a.schlink, a.eng, a.gre, a.bing') : null;
   if (!a || a.target !== '_blank') return;
   a.classList.add('is-loading');
   clearTimeout(_busyTimer);
