@@ -93,7 +93,9 @@
     min-width:64px;text-align:right}
   .rngval.approx::before{content:"≈ ";font-size:11px;color:var(--t3)}
   .count{margin-left:auto;font-size:12px;color:var(--t3)}
-  table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:760px}
+  /* min-width 由脚本按「各列最小宽之和」（VIEW.min）写在 table 上；这里不再写死，
+     否则会和 colgroup 的像素宽打架，把列挤回旧布局。 */
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
   th{position:sticky;top:0;background:var(--card);text-align:left;font-weight:500;font-size:12px;
     color:var(--t2);padding:8px 9px;border-bottom:.5px solid var(--line);white-space:nowrap;z-index:2}
   th:first-child{text-align:center}
@@ -165,7 +167,7 @@
   /* 触屏上把分数格的触控目标撑大。实测 6.5/80(4.5) 这类写法只有 63×19px，
      远低于触控最小 44×44px——手指很难按准，一歪就落到相邻的学校名或 Bing 上。
      加大纵向内边距把高度顶到 ~36px（再高会撑破行高），并给一个负外边距，
-     让多出来的部分向外扩、不挤动列宽（列宽是定死的 178px）。
+     让多出来的部分向外扩、不挤动列宽（列宽由 colgroup 的 min 宽 + table-layout:fixed 决定）。
      同时命中 (pointer:coarse) 与 (hover:none)：桌面版 Chrome 只报后者为 false，
      真机两者都成立，写两个条件更稳。 */
   @media (pointer:coarse), (hover:none){
@@ -214,7 +216,14 @@
   /* overscroll-behavior-x：表格横滑到底时不要顺带把整页左右晃
      （手机端横向链式回弹会让人误以为页面在抖） */
   .tbl-scroll{overflow:auto;overscroll-behavior-x:contain}
-  /* 学校列：无论窗口多窄都不折行，列宽按最长校名（英文名 209.8px）定死 236px */
+  /* 列宽策略（2026-09-23 改）：<colgroup> 里的像素宽现在只当「最小宽」，表格
+     同时 width:100%、table-layout:fixed。于是
+       · 窗口宽 → 各列按 min 宽比例一起放大，正好吃满 .wrap（不再右侧留一片空白）；
+       · 窗口窄 → 缩到 min 宽为止，之后 .tbl-scroll 内部横滑，列与列之间不留缝。
+     min 宽本身也按各列真实内容重算过（见脚本 VIEW.w 注释），把以前多留的
+     几十到上百像素还给相邻列——「雅思/托福」与「GRE」之间的空档就是这么来的。 */
+  .tbl-scroll table{table-layout:fixed;width:100%}
+  /* 学校列：无论窗口多窄都不折行，列宽按最长校名（英文名 218px）定死 */
   .tbl-scroll tbody td:nth-child(2){white-space:nowrap}
   h2{font-size:16px;font-weight:600;margin:36px 0 10px}
   .notes{background:var(--card);border:.5px solid var(--line);border-radius:12px;padding:4px 22px 18px}
@@ -753,12 +762,20 @@ const VIEW = {
   ov: {label:'按 U.S. News 2026 全美综合大学排名（附 CS 排名）', max:60,
        head:['名次','学校','所在州','类型','CS','雅思/托福','GRE','搜索'],
        /* 「对比 2025」列已按要求删除（2026-09-23）；GRE 列 56px 于同日恢复。
-          8 列合计 986px ＝ .wrap 内容宽（1036 − 48 padding），刚好铺满、不横向滚动 */
-       w:['50px','236px','158px','62px','64px','178px','56px','182px'], min:986,
+          w 现在是最小宽（不是固定宽）：表格 width:100% + table-layout:fixed，
+          窗口宽时各列按这些值等比例放大吃满 .wrap，窗口窄时缩到这里为止再横滑。
+          数值按实测内容重算（headless Chrome 量的每列最宽内容 + 18px 左右内边距）：
+            名次 50 / 学校 236（最长英文名 218 + 18，不折行）/
+            所在州 148（华盛顿哥伦比亚特区 129.8 + 18）/ 类型 56 / CS 48 /
+            雅思/托福 100（7.0/100(5.0) 76.8 + 18 + ⓘ）/ GRE 52 / 搜索 92（Bing 按钮 55.7） */
+       w:['50px','236px','148px','56px','48px','100px','52px','92px'], min:782,
        presets:[[1,10],[11,30],[31,60]]},
   cs: {label:'按 U.S. News 2026 最佳研究生计算机科学排名（前 50，覆盖到第 46 名）', max:46,
        head:['CS 名次','学校','所在州','类型','综合排名','雅思/托福','GRE','搜索'],
-       w:['50px','236px','158px','62px','146px','170px','56px','108px'], min:986,
+       /* 这一榜是 CS 前 50，里头没有「华盛顿哥伦比亚特区」那类长州名（最长 89.3px），
+          所以「所在州」能比综合榜窄一截；「综合排名」要容下 76.7px 的表头，保持 78。
+          合计 774 —— 比综合榜的 782 还窄 8px，900px 窗口下同样不会溢出。 */
+       w:['50px','236px','110px','56px','78px','100px','52px','92px'], min:774,
        presets:[[1,10],[11,30],[31,46]]}
 };
 let view = 'ov';
