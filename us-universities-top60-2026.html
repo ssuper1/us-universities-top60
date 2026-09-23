@@ -136,8 +136,54 @@
   .eng::after{content:"↗";font-size:10px;margin-left:2px;vertical-align:1px;opacity:.5}
   .eng:hover::after{opacity:1}
   .eng .new{color:var(--t3);font-size:11.5px;margin-left:1px}
+  /* 触屏上把分数格的触控目标撑大。实测 6.5/80(4.5) 这类写法只有 63×19px，
+     远低于触控最小 44×44px——手指很难按准，一歪就落到相邻的学校名或 Bing 上。
+     加大纵向内边距把高度顶到 ~36px（再高会撑破行高），并给一个负外边距，
+     让多出来的部分向外扩、不挤动列宽（列宽是定死的 178px）。
+     同时命中 (pointer:coarse) 与 (hover:none)：桌面版 Chrome 只报后者为 false，
+     真机两者都成立，写两个条件更稳。 */
+  @media (pointer:coarse), (hover:none){
+    .tbl-scroll .eng{margin:-9px -4px;padding:9px 4px}
+    .tbl-scroll .bing{margin:-4px -3px;padding:9px 12px}
+  }
+  /* 触屏设备上压掉表格里密集元素的长提示。
+     手机端按住一格不放，浏览器（含微信内置浏览器）会把 title 画成一条系统横幅：
+     它由系统合成层绘制，页面既关不掉也碰不到，横滑表格时还跟着手指不断冒出来挡住内容。
+     实际处理在脚本里（见 paint() 末尾的 stripTitlesOnTouch）：触屏上把表格内的
+     title 移进 data-tip，桌面鼠标不受影响，仍可悬停看说明。 */
   .eng.off{color:var(--t3);cursor:default;border-bottom:0}
   .eng.off::after{display:none}
+  /* ---------- 「ⓘ 分数怎么读」展开区 ----------
+     手机端按一下分数，浏览器会把 title 画成一条长横幅：它由系统合成层绘制，
+     页面既碰不到也关不掉，还挡住表格、横滑时跟着手指跑。
+     所以 title 只留一句短的（≤30 字，横幅不再遮挡），完整说明（每校分数含义、
+     罗格斯的听说读写四项、乔治华盛顿链接的坑）搬进这个可开合的区域。
+     好处是双向的：手机上不再有那条横幅，桌面上也不必把鼠标悬停在一格一格上找说明。 */
+  .engmorebtn{display:flex;width:100%;align-items:center;gap:9px;margin:10px 0 0;padding:9px 14px;
+    background:var(--card);border:.5px solid var(--line);border-radius:11px;cursor:pointer;
+    font:500 13px/1.4 inherit;color:var(--t2);text-align:left;
+    transition:color .15s,border-color .15s}
+  .engmorebtn:hover{color:var(--blue-tx);border-color:var(--blue-tx)}
+  .engmorebtn:focus-visible{outline:2px solid var(--blue-tx);outline-offset:2px}
+  .engmorebtn .emar{display:inline-block;flex:none;font-size:10px;color:var(--t3);transition:transform .18s}
+  .engmorebtn.on .emar{transform:rotate(90deg)}
+  .engmorebtn .emtx{flex:none}
+  .engmorebtn .emmeta{margin-left:auto;font-size:11.5px;font-weight:400;color:var(--t3)}
+  @media (prefers-reduced-motion: reduce){ .engmorebtn .emar{transition:none} }
+  .engmore{margin:9px 0 0;padding:4px 16px 14px;background:var(--card);
+    border:.5px solid var(--line);border-radius:12px}
+  .engmore[hidden]{display:none}
+  /* 说明逐条列出：每条一行，校名加粗，窄屏自动折行 */
+  .engmore dl{margin:12px 0 0;font-size:12.5px;line-height:1.6}
+  .engmore dt{font-weight:600;color:var(--t1);margin-top:11px}
+  .engmore dt:first-child{margin-top:0}
+  .engmore dd{margin:2px 0 0;color:var(--t2)}
+  .engmore .emnote{margin:12px 0 0;font-size:11.5px;color:var(--t3);line-height:1.65}
+  @media (max-width:640px){
+    .engmorebtn{flex-wrap:wrap;gap:2px 9px;padding:9px 12px}
+    .engmorebtn .emmeta{margin-left:0;flex-basis:100%;padding-left:19px}
+    .engmore{padding:4px 13px 12px}
+  }
   /* overscroll-behavior-x：表格横滑到底时不要顺带把整页左右晃
      （手机端横向链式回弹会让人误以为页面在抖） */
   .tbl-scroll{overflow:auto;overscroll-behavior-x:contain}
@@ -336,6 +382,14 @@
         <tbody id="rows"></tbody>
       </table>
     </div>
+    <!-- 手机端点分数时，浏览器会把 title 画成一条长横幅，它不受页面控制、关不掉。
+         于是把「该校要多少分」的完整说明从 title 里搬到这里，由这个按钮控制开合：
+         既解决关不掉的横幅，也省下表格宽度（说明只在展开时才占版面）。 -->
+    <button class="engmorebtn" id="engmoretoggle" type="button"
+            aria-expanded="false" aria-controls="engmore">
+      <span class="emar" aria-hidden="true">▸</span><span class="emtx">ⓘ 分数怎么读</span><span class="emmeta">各校分数含义与提示</span>
+    </button>
+    <div class="engmore" id="engmore" hidden></div>
   </div>
   <p class="hint" style="margin:10px 2px 0">上方可按<strong>当前榜的名次</strong>筛选：拖动<strong>「名次滑轨」</strong>的两个手柄（每 10 名吸附一档；两边留空＝不限），或点它右边的 1–10 / 11–30 / 31–60 快捷区间。点「所在州」在地图上定位，点「Bing」开新标签页搜索，点<strong>校名</strong>跳官网——<strong>综合排名第 20 名之前</strong>跳官网首页（外观与正文一样、不带下划线），<strong>第 20 名及以后</strong>跳该校研究生入学要求页（带下划线 + ↗ 标记）；点「雅思/托福」那一格里的分数，跳到该校官网原文。</p>
 
@@ -619,6 +673,13 @@ const ENG = {
   '明尼苏达大学双城分校': ['6.5/79(4.5)', 'https://grad.umn.edu/admissions/application-instructions'],
 };
 
+/* ENG 之外的补充说明，只用于「ⓘ 分数怎么读」展开区（engDesc）。
+   放这里的理由：这些提示讲的是「链接本身有什么坑」，属于页面级提醒，
+   和「该校要多少分」不是一回事，塞进 ENG 的第 3 个字段会把两件事混在一起。 */
+const ENG_ALT = {
+  '乔治华盛顿大学': '该校招生站整站被 Cloudflare 拦截，域名有效但页面无法验证，点入前请留意',
+};
+
 const VIEW = {
   ov: {label:'按 U.S. News 2026 全美综合大学排名（附 CS 排名）', max:60,
        head:['名次','学校','所在州','类型','CS','雅思/托福','搜索'],
@@ -851,10 +912,29 @@ function engCell(d){
      罗格斯按单项给分、不公布总分，这里取它新 6 分制的写作项 4.5，细节写在 e[2]。 */
   const t = parseFloat(main.split('/')[1]);
   const kind = i >= 0 ? '官网新旧两套并列' : (t <= 6 ? '官网只挂新 6 分制' : '官网只挂旧 0–120 分制');
-  const tip = cn + ' 研究生英语最低要求：雅思 / 托福 ' + sc + '（' + (e[2] || kind) + '，点击查看官网原文）';
-  if (!url) return '<span class="eng off" title="' + tip + '">' + main + tail + '</span>';
-  return '<a class="eng" href="' + url + '" target="_blank" rel="noopener noreferrer" title="' + tip + '">'
+  /* 手机端此前把整段说明塞在 title 里，一按住就被浏览器画成一条长横幅，挡住表格又关不掉。
+     现在只留一句短的（≤30 字，横幅不再遮挡），完整说明改由下面 engDesc() 拼进 #engmore，
+     由「ⓘ 分数怎么读」按钮控制展开——既能自己关，也不占表格宽度。 */
+  const tip = '雅思 / 托福 ' + sc + ' · 点开官网原文';
+  if (!url) return '<span class="eng off" data-cn="' + cn + '">' + main + tail + '</span>';
+  /* data-cn 让校名不依赖 title 传递：手机上 title 会被移除（躲开系统横幅），
+     测试与脚本仍能靠这个属性把格子与学校对上。 */
+  return '<a class="eng" data-cn="' + cn + '" href="' + url + '" target="_blank" rel="noopener noreferrer" title="' + tip + '">'
     + main + tail + '</a>';
+}
+
+/* 「ⓘ 分数怎么读」展开区要用的完整说明：把 43 条里每所学校的英语要求 +
+   该条目的释义（e[2]，如罗格斯的听说读写四项分值）逐条列出来。
+   这些文字以前都堆在各自的 title 里、手机上一点就成横幅，现在只在这里出现一次。 */
+function engDesc(d){
+  const cn = d[0], e = ENG[cn];
+  if (!e) return null;
+  const sc = e[0], i = sc.indexOf('(');
+  const main = i < 0 ? sc : sc.slice(0, i);
+  const t = parseFloat(main.split('/')[1]);
+  const kind = i >= 0 ? '官网新旧两套并列' : (t <= 6 ? '官网只挂新 6 分制' : '官网只挂旧 0–120 分制');
+  return cn + '：雅思 / 托福 ' + sc + '（' + (e[2] || kind) + '）'
+    + (ENG_ALT[cn] ? '，' + ENG_ALT[cn] : '');
 }
 
 /* 综合视图原末列「对比 2025」的函数（2026-09-23 按要求删掉了这一列，函数先留着：
@@ -876,6 +956,36 @@ function visible(d){
 }
 
 function sortKey(d){ return view === 'cs' ? d[9] : d[4]; }
+
+/* ---------- 触屏设备：表格内不放 title ----------
+   手机端按住校名 / 分数 / Bing 那一格，浏览器会把 title 画成一条系统横幅：
+   不归页面管、没有关闭按钮，横滑表格时还跟着手指反复冒出来挡住内容——
+   这是手机上「点了分数出现横幅却关不掉」的直接原因。
+   测下来唯一可靠的做法是触屏上干脆不给这些元素挂 title，说明交给
+   「ⓘ 分数怎么读」那个可开合的区域（桌面鼠标仍保留悬停提示）。
+   paint() 每次都会重建整片 <tr>，所以必须挂在它末尾反复调用。
+
+   判定只看两条媒体查询：(pointer:coarse) 或 (hover:none)，命中任一即为触屏。
+   真机 iPhone / Android / 微信 WebView 两者都为 true；桌面鼠标都为 false。
+   特意不用 'ontouchstart' in window 兜底——带触摸屏的 Windows 笔记本在桌面版
+   Chrome 下该属性也存在，用它判断会把鼠标用户一并当成触屏，白白丢掉悬停提示。 */
+const TOUCH = (() => {
+  const mm = window.matchMedia;
+  if (!mm) return false;
+  try {
+    return mm('(pointer:coarse)').matches || mm('(hover:none)').matches;
+  } catch (e) { return false; }        // 极老的浏览器不认这些查询，保持桌面行为即可
+})();
+function stripTitlesOnTouch(){
+  if (!TOUCH) return;
+  const scroller = document.querySelector('.tbl-scroll');
+  if (!scroller) return;
+  scroller.querySelectorAll('[title]').forEach(el => {
+    if (el.dataset.tip) return;                  // 已经搬过一次，别用空值覆盖
+    el.dataset.tip = el.getAttribute('title');   // 提示只搬个家，不丢信息
+    el.removeAttribute('title');
+  });
+}
 
 function paint(){
   const q = document.getElementById('q').value.trim().toLowerCase();
@@ -919,6 +1029,7 @@ function paint(){
   rowsEl.innerHTML = html;
   countEl.textContent = '共 ' + items.length + ' 所';
   vcountEl.textContent = VIEW[view].label;
+  stripTitlesOnTouch();
 }
 
 document.querySelectorAll('.segbtn').forEach(b => b.addEventListener('click', () => {
@@ -1111,7 +1222,34 @@ document.addEventListener('pointerdown', e => {
   const t = e.target;
   const a = t && t.closest ? t.closest('a[href]') : null;
   if (a) warmOrigin(a.getAttribute('href'));
+  /* 记下这一次「手指落下」的位置。表格在手机上必须横滑，而分数格、校名、Bing
+     都又小又密（实测分数格只有 63×19px），横滑的起点几乎必然落在某一格上。
+     如果不做区分，松手时浏览器会补一个 click，结果「想滑表格」变成「跳官网」——
+     这是手机端最难受的一处：链接被误点开，还要回退、关标签页。 */
+  if (e.pointerType !== 'mouse') _tapFrom = { x: e.clientX, y: e.clientY };
 }, { capture: true, passive: true });
+
+/* 手指落下后移动超过这个距离就判定为「滑动」，这次手势不再算点击。
+   10px 是触屏的常规阈值：比误触抖动大，又不至于让正常的轻点被判成滑动。 */
+const TAP_SLOP = 10;
+let _tapFrom = null;
+document.addEventListener('pointermove', e => {
+  if (!_tapFrom || e.pointerType === 'mouse') return;
+  const dx = e.clientX - _tapFrom.x, dy = e.clientY - _tapFrom.y;
+  if (dx * dx + dy * dy > TAP_SLOP * TAP_SLOP) _tapFrom.moved = true;
+}, { capture: true, passive: true });
+
+/* 滑动手势结束后，浏览器仍可能补发 click。这里在捕获阶段拦下来：
+   只要这一轮手指是滑动过的，就不让它触发导航（_tapFrom 在 pointerdown 时重置）。 */
+document.addEventListener('click', e => {
+  if (_tapFrom && _tapFrom.moved){
+    e.preventDefault();
+    e.stopPropagation();
+    _tapFrom = null;
+    return;
+  }
+  _tapFrom = null;
+}, { capture: true });
 
 /* 按下后到新页面出现之间给一个明确状态，避免「点了没反应」的错觉。
    1.6 秒后自动复位，这样从新标签页返回时不会残留成一直转的样子。 */
@@ -1159,6 +1297,56 @@ if (CT && CD){
     CD.hidden = !open;
     CT.setAttribute('aria-expanded', String(open));
     CT.classList.toggle('on', open);
+  });
+}
+
+/* ---------- 「ⓘ 分数怎么读」：首次展开才建 DOM，之后复用 ----------
+   内容来自 ENG / ENG_ALT：每校一句「雅思/托福多少分 + 官网挂的是哪一套」，
+   这些文字此前全在各自的 title 里，手机上一按就成关不掉的系统横幅。
+
+   43 条全列出来是 2000 多字 / 2600 多像素高，手机上一次铺开像一堵墙，
+   比原来那条横幅还难用。所以分两层：
+     · 逐校清单：只列「官网挂的套别特殊、或另有说明」的学校（下面 NOTABLE），
+       其余大多数是常规的「新旧两套并列」，看一眼规则就懂，不必逐条重复；
+     · 规则说明：把通用写法 + 特例（各系自定、未公布、单项给分）讲一遍。
+   这样列表长度从 43 条降到十几条，且留下的全是有信息量的例外。 */
+const EM  = document.getElementById('engmoretoggle'),
+      EMB = document.getElementById('engmore');
+if (EM && EMB){
+  let emBuilt = false;
+  EM.addEventListener('click', () => {
+    const opening = EMB.hidden;
+    if (opening && !emBuilt){
+      /* 只挑例外：官方明确按单项给分 / 各系自定 / 不设校级线 / 只挂一套的，逐校列。
+         普通「新旧两套并列 + 常规分数线」不逐条重复，规则写在下面一段里。 */
+      const NOTABLE = [
+        '卡内基梅隆大学', '埃默里大学', '罗格斯大学新布朗斯维克分校',
+        '乔治城大学', '南加州大学', '弗吉尼亚大学',
+        '加州大学戴维斯分校', '佛罗里达大学', '维拉诺瓦大学', '圣塔克拉拉大学',
+        '加州大学默塞德分校', '乔治华盛顿大学',
+      ];
+      const src = D.filter(d => NOTABLE.indexOf(d[0]) >= 0 && ENG[d[0]])
+                    .slice()
+                    .sort((a, b) => sortKey(a) - sortKey(b));
+      let html = '<dl>';
+      for (const d of src){
+        const t = engDesc(d);
+        if (!t) continue;
+        html += '<dt>' + d[0] + '</dt><dd>'
+              + t.slice(d[0].length + 1) + '</dd>';   // 去掉开头重复的校名
+      }
+      html += '</dl>'
+        + '<p class="emnote"><strong>通用写法</strong>：本列只照抄官网印出来的那一套，'
+        + '不替学校补历史分值。新旧两套并列的写「雅思/旧制(新制)」，如 <em>6.5/80(4.5)</em>；'
+        + '官网只挂新 6 分制的直接写 <em>7.0/4.5</em>；只挂旧制的写 <em>6.5/81</em>。'
+        + '「只挂一套」不等于另一套不被接受，而是官网还没更新——申请前请按自己的考试日期对照官网原文。'
+        + '点分数即跳该校官网原文；威廉与玛丽未公布统一最低线，显示 <em>—</em>。</p>';
+      EMB.innerHTML = html;
+      emBuilt = true;
+    }
+    EMB.hidden = !opening;
+    EM.classList.toggle('on', opening);
+    EM.setAttribute('aria-expanded', String(opening));
   });
 }
 
